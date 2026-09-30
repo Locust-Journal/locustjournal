@@ -1,0 +1,34 @@
+{{ define "404.html" }}
+{{- /* 404 兜底页：保持期刊语气 */ -}}
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale | default "zh-CN" }}">
+<head>
+  {{ partial "head.html" . }}
+  {{- $title := "404 · 蝗迹未存" }}
+  <title>{{ $title }}</title>
+</head>
+<body>
+<main class="main">
+  <div class="content">
+    <h1>404 · 蝗迹未存</h1>
+    <blockquote>
+      <p>报告转瞬即逝，茶歇亘古长存。<br />
+      但这一页，连茶歇都没有。</p>
+    </blockquote>
+    <p>你访问的页面不存在、已被撤稿，或作者在组会前一晚把它从硬盘上删了（我们深有体会）。</p>
+    <p>以下或许有用：</p>
+    <ul>
+      <li><a href="{{ "/" | relURL }}">返回首页</a></li>
+      <li><a href="{{ "/articles/" | relURL }}">浏览全部蝗札</a></li>
+      <li><a href="{{ "/scholar/" | relURL }}">阅览蝗客学社</a></li>
+      <li><a href="{{ "/archive/" | relURL }}">总归档</a></li>
+    </ul>
+    <hr />
+    <p style="font-size:0.9em;opacity:0.75">
+      LOCUST Journal《学术蝗虫》· 娱乐模拟学术刊物，无学术效力
+    </p>
+  </div>
+</main>
+</body>
+</html>
+{{ end }}

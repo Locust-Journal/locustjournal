@@ -1,0 +1,117 @@
+baseURL = "https://locustjournal.com/"
+locale = "zh-CN"
+title = "LOCUST Journal《学术蝗虫》"
+theme = "PaperMod"
+enableRobotsTXT = true
+
+# 首页文章流只收「蝗札」，避免与「蝗客学社」随笔混淆栏目定位
+mainSections = ["articles"]
+
+[pagination]
+  pagerSize = 10
+
+[params]
+  author = "LOCUST Journal Editorial Board"
+  description = "LOCUST Journal，收录全学科失败实验、翻车观测与脑洞实证，面向科研群体的趣味模拟学术刊物。"
+  defaultTheme = "light"
+  disableThemeToggle = true
+  showReadingTime = true
+  showShareButtons = false
+  ShowPostDate = true
+  ShowReadingTime = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowFullTextLinks = true
+  ShowTags = true
+  TableOfContents = false
+  SummaryLength = 30
+  RelatedPosts = true
+  copyrightStart = "2026"
+  # 首页显示作者/日期等元信息
+  ShowHomePageParams = true
+  # 侧边栏档案卡
+  [params.profile]
+    enabled = false
+  [params.label]
+    text = "内测号 · 第1卷"
+    color = "#b45309"
+  [params.footer]
+    [params.footer.params]
+      showEmoji = true
+      hideIcon = false
+  [params.editURL]
+    enable = false
+  [params.assets]
+    favicon = "images/favicon.png"
+  # 自定义样式（覆盖主题，不改 themes/）
+  customCSS = ["css/extend/custom.css"]
+
+[menu]
+  [[menu.main]]
+    name = "首页"
+    pageRef = "/"
+    weight = 1
+  [[menu.main]]
+    name = "发刊宗旨"
+    pageRef = "/about"
+    weight = 2
+  [[menu.main]]
+    name = "投稿须知"
+    pageRef = "/guide"
+    weight = 3
+  [[menu.main]]
+    name = "蝗札"
+    pageRef = "/articles"
+    weight = 4
+  [[menu.main]]
+    name = "蝗客学社"
+    pageRef = "/scholar"
+    weight = 5
+  [[menu.main]]
+    name = "编委会"
+    pageRef = "/board"
+    weight = 6
+  [[menu.main]]
+    name = "总归档"
+    pageRef = "/archive"
+    weight = 7
+
+[footer]
+  copyright = "© 2026 LOCUST Journal Editorial Board"
+  message = """
+本刊为娱乐模拟学术刊物，不具备正式出版资质，所刊内容无学术效力，不得用于学位申请、职称评定与项目申报。<br>
+本刊永久免费，不收取任何版面费、审稿费与处理费。
+"""
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.goldmark.parser]
+    [markup.goldmark.parser.attribute]
+      block = true
+      title = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 3
+    ordered = false
+  [markup.highlight]
+    noClasses = false
+    style = "github"
+
+[services]
+  [services.rss]
+    limit = 20
+
+[languages]
+  [languages.zh-CN]
+    label = "中文"
+    contentDir = "content"
+    weight = 1
+    title = "LOCUST Journal《学术蝗虫》"
+    [languages.zh-CN.params]
+      description = "LOCUST Journal，收录全学科失败实验、翻车观测与脑洞实证，面向科研群体的趣味模拟学术刊物。"
+      author = "LOCUST Journal Editorial Board"

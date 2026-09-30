@@ -1,0 +1,21 @@
+# Hugo 构建产物
+/public/
+/resources/
+.hugo_build.lock
+
+# 编辑器
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# 系统
+.Library/
+.Trashes/
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk

@@ -47,17 +47,37 @@ mkdir -p "${HUGO_CACHEDIR}" "${HOME}/.local"
 #
 # 必须用 extended 包：普通包不支持 SCSS，且与本地的 +extended 产物不一致，
 # 会导致「本地样式正常、线上样式错乱」。
+#
+# 平台自动探测：Cloudflare 构建镜像是 linux-amd64，但本地 dry-run 在
+# macOS/arm64 上跑。早期硬编码 linux-amd64，导致本地一跑就报
+# "cannot execute binary file"（exit 126）。
 #------------------------------------------------------------------------------
 HUGO_BIN_DIR="${HOME}/.local/hugo/bin"
 HUGO_BIN="${HUGO_BIN_DIR}/hugo"
 
+hugo_platform() {
+  local os arch
+  case "$(uname -s)" in
+    Linux)  os="linux" ;;
+    Darwin) os="darwin" ;;
+    *) echo "不支持的操作系统：$(uname -s)" >&2; exit 1 ;;
+  esac
+  case "$(uname -m)" in
+    x86_64|amd64)  arch="amd64" ;;
+    arm64|aarch64) arch="arm64" ;;
+    *) echo "不支持的 CPU 架构：$(uname -m)" >&2; exit 1 ;;
+  esac
+  echo "${os}-${arch}"
+}
+
 if [[ -x "${HUGO_BIN}" ]] && "${HUGO_BIN}" version 2>/dev/null | grep -q "v${HUGO_VERSION}.*+extended"; then
   echo "==> Hugo ${HUGO_VERSION} (extended) 已就绪，跳过下载"
 else
-  echo "==> 下载 Hugo ${HUGO_VERSION} (extended, linux-amd64)"
+  HUGO_PLATFORM="$(hugo_platform)"
+  echo "==> 下载 Hugo ${HUGO_VERSION} (extended, ${HUGO_PLATFORM})"
   build_temp_dir="$(mktemp -d)"
 
-  HUGO_TARBALL="hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+  HUGO_TARBALL="hugo_extended_${HUGO_VERSION}_${HUGO_PLATFORM}.tar.gz"
   HUGO_URL="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_TARBALL}"
 
   curl -sfL --retry 3 --retry-delay 2 -o "${build_temp_dir}/${HUGO_TARBALL}" "${HUGO_URL}"
@@ -201,3 +221,17 @@ fi
 page_count=$(find public -name "*.html" -type f | wc -l | tr -d ' ')
 echo "==> 构建完成：${page_count} 个 HTML 页面"
 echo "==> 输出目录：public/"
+
+# 本脚本只负责「构建」，不负责「上传」。
+# 上传由 `wrangler deploy` 统一完成：它会先执行 wrangler.jsonc 里的
+# build.command（即本脚本）构建，再把 public/ 作为静态资源推上线。
+#
+# 反面教材（两个都踩过）：
+#   1. 在本脚本末尾调 `wrangler deploy` → wrangler 再读 build.command
+#      调回本脚本 → 无限递归。
+#   2. 想用 `wrangler deploy --skip-build` 规避递归 → 该参数根本不存在。
+#      跳过打包的开关叫 --no-bundle，且它跳的是打包，不是自定义构建。
+#
+# 早前的症状：构建日志全绿（27 个 HTML 页面、图标闭环校验通过），
+# 但线上返回 Cloudflare 脚手架默认的 "Hello world"，仅 11 字节、
+# content-type: text/plain。原因是只构建、没上传。

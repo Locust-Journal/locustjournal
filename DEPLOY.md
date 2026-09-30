@@ -156,9 +156,23 @@ Cloudflare 已停止推荐 Pages（不再维护），官方现在把纯静态站
 2. 左侧 **Compute & AI** → **Workers & Pages**
 3. **Create application** → **Connect to Git** → 选 `Locust-Journal/locustjournal`
 4. 项目名填 `locustjournal`（须与 `wrangler.jsonc` 的 `name` 一致）
-5. **Build command** 填 `chmod +x build.sh && ./build.sh`
-   （不要用默认的 `npx wrangler deploy` —— 那是无构建步骤的纯 Worker 脚本部署方式）
+5. **Build command** 填 `npx wrangler deploy`
 6. **Deploy**
+
+> ⚠️ 这里必须是 `npx wrangler deploy`，**不要**改成 `chmod +x build.sh && ./build.sh`。
+>
+> Dashboard 的 **Build command** 只负责「跑构建」，产物**不会**被自动上传。
+> 早前填成 `build.sh` 时，构建日志全绿（27 个 HTML 页面、图标闭环校验全过），
+> 但线上返回的是 Cloudflare 脚手架默认的 `Hello world` —— 仅 11 字节、
+> `content-type: text/plain`。
+>
+> `npx wrangler deploy` 会自己先执行 `wrangler.jsonc` 里的
+> `build.command`（即 `build.sh`）完成构建，再把 `public/` 作为静态资源推上线。
+> **一个入口同时负责构建与上传，不会递归。**
+>
+> 反面教材：不要在 `build.sh` 末尾调 `wrangler deploy` —— wrangler 会再读
+> `build.command` 调回 `build.sh`，无限递归。也不存在 `wrangler deploy --skip-build`
+> 这个参数（跳过打包的开关叫 `--no-bundle`，且它跳的是打包不是自定义构建）。
 
 构建通常 1–3 分钟（首次要下载 Hugo 约 30MB）。
 
@@ -304,8 +318,10 @@ PY
 
 | 现象 | 根因 | 处置 |
 |------|------|------|
-| **构建命令栏默认给 `npx wrangler deploy`** | Workers 的默认值，那是无构建步骤的纯 Worker 部署方式 | 改成 `chmod +x build.sh && ./build.sh` |
-| 线上白屏，无样式 | submodule 未拉取，CSS 缺失 | 查构建日志有无「初始化 git submodule」段；`build.sh` 也会因缺 `public/css/extended.css` 直接失败 |
+| **构建日志全绿，线上却是 `Hello world`** | Build command 填成了 `build.sh` —— 它只构建、不上传，产物没推上去 | 改成 `npx wrangler deploy`（它会自己调 `build.command` 再上传）。自查：`curl -sI 站点 \| grep content-type` 若不是 `text/html` 就是这个问题 |
+| 本地 `npx wrangler deploy` 报 `cannot execute binary file`（exit 126） | `build.sh` 曾硬编码下载 linux-amd64 的 Hugo，macOS 跑不了 | 已修：`build.sh` 改为按 `uname` 自动探测 darwin-arm64 / linux-amd64 |
+| 本地 dry-run 报 curl exit 56 | 到 GitHub Release 的网络被中断 | 与脚本无关，Cloudflare 构建机可正常下载；本地验证可改用已装的 hugo |
+| 线上白屏，无样式 | submodule 未拉取，CSS 缺失 | 查构建日志有无「初始化 git submodule」段；`build.sh` 也会因缺 CSS 直接失败 |
 | 404 返回 Cloudflare 默认页而非期刊 404 页 | `assets.not_found_handling` 没生效 | 核对 `wrangler.jsonc` 里是 `"404-page"` |
 | Hugo 下载失败导致部署失败 | 网络问题 | Cloudflare 会自动重试；也可把 Hugo 装进构建镜像 |
 | 构建因 warning 失败 | 远端 Hugo 版本与本地有差异 | `build.sh` 已刻意不加 `--panicOnWarning`；若你在 Dashboard 另填了命令，去掉该参数 |

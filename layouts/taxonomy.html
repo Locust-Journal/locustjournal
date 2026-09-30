@@ -1,0 +1,59 @@
+{{- /* LOCUST Journal 分类索引页 —— 期刊的「主题索引」
+     形制对应真实期刊卷末的「主题索引」：不是一排圆角标签药丸，
+     而是双栏索引起目，词条 + 篇数 + 所属栏目，附大写字顺。 */ -}}
+
+{{- define "main" }}
+<article class="lj-doc">
+
+  {{/* ---------- 刊号戳 ---------- */}}
+  <div class="lj-docstamp">
+    <span class="lj-docstamp__no">主 题 索 引</span>
+    <span class="lj-docstamp__kind">INDEX</span>
+  </div>
+
+  {{/* ---------- 刊名 ---------- */}}
+  {{- /* Hugo 的 .Title 对 taxonomy 总表给的是英文 "Tags"/"Categories"，
+         这里按 .Data.Singular 自己定中文刊名。 */}}
+  {{- $idxName := cond (eq .Data.Singular "tag") "主题索引" "学科索引" }}
+  <header class="lj-masthead lj-masthead--compact">
+    <h1 class="lj-masthead__name">{{ $idxName }}</h1>
+    <p class="lj-masthead__subtitle">{{ len .Pages }} 个词条 · 按字顺排列</p>
+  </header>
+
+  <div class="lj-imprint">
+    <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">范围</span>全刊篇目</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">编辑</span>LOCUST Journal Editorial Board</span>
+  </div>
+
+  {{/* ---------- 索引起目 ---------- */}}
+  {{- $terms := .Pages.ByTitle }}
+  {{- if $terms }}
+  <ul class="lj-indexlist">
+    {{- range $terms }}
+      <li class="lj-indexlist__item">
+        <a class="lj-indexlist__term" href="{{ .RelPermalink }}">{{ .Title }}</a>
+        <span class="lj-indexlist__count">{{ len .Pages }}</span>
+        <span class="lj-indexlist__scope">
+          {{- $sections := slice }}
+          {{- range .Pages }}
+            {{- $s := cond (eq .Section "articles") "蝗札" "随笔" }}
+            {{- if not (in $sections $s) }}{{ $sections = $sections | append $s }}{{ end }}
+          {{- end }}
+          {{ delimit $sections " · " }}
+        </span>
+      </li>
+    {{- end }}
+  </ul>
+  {{- else }}
+  <p class="lj-doc__empty">本卷尚未使用任何主题词条。</p>
+  {{- end }}
+
+  {{/* ---------- 版权尾栏 ---------- */}}
+  <div class="lj-doc__colophon">
+    <span class="lj-doc__colophon-label">索引</span>
+    <span>词条随新篇目自动更新，不接受人工干预排序。</span>
+  </div>
+
+</article>
+{{- end }}

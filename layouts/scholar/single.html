@@ -1,0 +1,44 @@
+{{- /* LOCUST Journal 蝗客学社随笔页
+     随笔不是论文：不分配发蝗掠指数，不配审稿意见书，不排成摘要框。
+     版式形制对应期刊里的「读者论坛 / 短论」栏目：
+       栏目眉（学社 · 随笔 + 不配发指数）→ 篇首题名 → 正文 → 篇末版权条
+     这样读者一眼能分清「哪篇是正式刊载、哪篇是随手写的」。 */ -}}
+
+{{- define "main" }}
+<article class="lj-essay">
+
+  {{/* ---------- 栏目眉 ---------- */}}
+  <div class="lj-essay__rubric">
+    <span class="lj-essay__rubric-name">蝗客学社 · 随笔</span>
+    <span class="lj-essay__rubric-note">仅经合规审核　不配发蝗掠指数　不纳入蝗札序列</span>
+  </div>
+
+  {{/* ---------- 篇首 ---------- */}}
+  <header class="lj-essay__head">
+    <h1 class="lj-essay__title">{{ .Title }}</h1>
+    <p class="lj-essay__byline">
+      {{ .Date.Format "2006 年 1 月 2 日" }}
+      {{- with .Params.tags }}　{{ delimit . " · " }}{{ end }}
+    </p>
+  </header>
+
+  {{/* ---------- 题记 ---------- */}}
+  {{- with .Description }}
+    <div class="lj-essay__epigraph">
+      {{ . }}
+    </div>
+  {{- end }}
+
+  {{/* ---------- 正文 ---------- */}}
+  <div class="post-content lj-essay__body">
+    {{ .Content }}
+  </div>
+
+  {{/* ---------- 篇末版权条 ---------- */}}
+  <div class="lj-essay__colophon">
+    <span class="lj-essay__colophon-label">学社随笔</span>
+    <span>本文属蝗客学社栏目，不经双盲评审，不配发蝗掠指数，不具备任何学术效力。</span>
+  </div>
+
+</article>
+{{- end }}

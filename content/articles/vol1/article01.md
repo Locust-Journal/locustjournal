@@ -4,18 +4,19 @@ titleEn: "On the Spontaneous Disappearance of Log Traces in Memory Forensics: An
 authors: ["某蝗客"]
 date: 2026-09-30
 draft: false
-locust_index: "7.8"
 vol: 1
 tags: ["电子取证", "Linux", "内存分析", "复现失败"]
 categories: ["电子取证"]
 description: "在一次 Linux 内存镜像取证实验中观测到特定操作序列下系统日志痕迹非预期随机消失，本文记录完整实验环境、复现过程与排查路径，并在排除常规技术因素后给出若干种玄学层面的可能解释。"
+seq: "01"
+page: "1"
+affiliation: "某野鸡实验室 · 现象观测组"
+locust_index: "7.8"
+review: '技术排查扎实（时序正相关、缓冲区全零均为有效观察），方法论自省诚实。扣分项在于玄学模型 H2 的 n 过小仍被列出，以及部分"客观"措辞掩盖了明显的作者作息混杂。**不过作者自己把这条混杂写进了局限性，这种自我拆台反而加了分。**'
+verdict: "准予登札"
+pdf: "/assets/pdf/vol1/article01.pdf"
 ---
 
-## 摘要
-
-在一次 Linux 内存镜像取证实验中，观测到特定操作序列下系统日志痕迹出现非预期的随机消失现象。本文完整记录了实验环境、复现过程与排查路径，在排除常规技术因素后，对该现象给出了若干种玄学层面的可能解释。实验共记录 23 次镜像获取、11 次有效观测，最终提出 5 个玄学解释模型，其中"会议临近度效应"与观测吻合度最高（ρ=0.71，n=11，p<0.05）。
-
-**关键词**：内存取证；日志丢失；实验玄学；复现失败
 
 ## 1 引言
 
@@ -150,11 +151,3 @@ $ python3 vol.py -f mem.lime linux.check_syscall.Check_syscall
 [2] CASE C, LEWIS A. Advancing digital forensics[M]//Digital Forensics Research Workshop. 2012.
 
 [3] HOGAN C J, HARGREAVES C. Six Measures of Cybersecurity[J]. Journal of Cybersecurity, 2022, 8(1): tzac025. 〔本文对其"日志留存"相关论断提出质疑〕
-
----
-
-> **蝗掠指数 7.8 / 10**
->
-> **巡食官评语**：技术排查扎实（时序正相关、缓冲区全零均为有效观察），方法论自省诚实。扣分项在于玄学模型 H2 的 n 过小仍被列出，以及部分"客观"措辞掩盖了明显的作者作息混杂。**不过作者自己把这条混杂写进了局限性，这种自我拆台反而加了分。**
->
-> **审稿结论**：准予登札

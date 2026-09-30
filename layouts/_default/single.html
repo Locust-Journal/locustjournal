@@ -1,0 +1,74 @@
+{{- /* LOCUST Journal 单篇文章页 —— 学术论文排版
+     篇首（题名/作者/单位/摘要框/关键词）→ 正文（首行缩进+两端对齐）→ 审稿意见书
+     刻意不用 PaperMod 默认的「标题+元信息+正文」博客版式。
+
+     审稿意见书从 front matter 的 review 字段读取：
+       locust_index: "7.8"
+       verdict: "准予登札"
+       review: "巡食官评语正文……"
+     若 front matter 未提供，则回退到正文末尾的 blockquote（作者手写的审稿块）。 */ -}}
+
+
+{{- define "main" }}
+<article class="post-content">
+
+  {{/* ---------- 篇首 ---------- */}}
+  <header class="lj-article-head">
+    {{- with .Params.seq }}
+      <p class="lj-article-head__kicker">蝗札 · 第 {{ . }} 篇</p>
+    {{- end }}
+
+    <h1 class="lj-article-head__title">{{ .Title }}</h1>
+
+    {{- with .Params.titleEn }}
+      <p style="font-size:.86rem;color:var(--lj-ink-soft);font-style:italic;margin:0 0 .9rem;line-height:1.6;text-align:center">
+        {{ . }}
+      </p>
+    {{- end }}
+
+    <p class="lj-article-head__authors">
+      {{- with .Params.authors }}{{ delimit . "、" }}{{ end }}
+    </p>
+
+    {{- with .Params.affiliation }}
+      <p class="lj-article-head__affil">{{ . }}</p>
+    {{- end }}
+
+    {{- with .Description }}
+      <div class="lj-abstract">
+        <p class="lj-abstract__label">摘　要</p>
+        <p class="lj-abstract__body">{{ . }}</p>
+      </div>
+    {{- end }}
+
+    {{- with .Params.tags }}
+      <p class="lj-keywords">
+        <span class="lj-keywords__label">关键词</span>{{ delimit . "；" }}
+      </p>
+    {{- end }}
+  </header>
+
+  {{/* ---------- 正文 ---------- */}}
+  {{ .Content }}
+
+  {{/* ---------- 审稿意见书 ----------
+       仅当 front matter 提供了 review 字段时渲染；
+       否则作者手写的 blockquote 已在 .Content 里呈现，不重复输出。 */}}
+  {{- if and .Params.locust_index .Params.review }}
+    <section class="lj-review">
+      <div class="lj-review__head">
+        <h2 class="lj-review__title">审 稿 意 见 书</h2>
+        <p class="lj-review__score">
+          蝗掠指数 <b>{{ .Params.locust_index }}</b> / 10
+        </p>
+      </div>
+      <div class="lj-review__body">
+        {{ .Params.review | markdownify }}
+      </div>
+      {{- with .Params.verdict }}
+        <p class="lj-review__verdict">审稿结论：<b>{{ . }}</b></p>
+      {{- end }}
+    </section>
+  {{- end }}
+
+{{- end }}

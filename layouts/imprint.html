@@ -1,0 +1,54 @@
+{{- /* LOCUST Journal 刊务公告页 —— 章程 / 须知 / 编务
+     形制对应真实期刊卷首的「刊务告白」：
+       刊号戳 → 刊名 → 目次 → 条文正文（自动条款号）→ 版权尾栏
+     与 blog post 版式的区别：没有日期时间戳、没有作者头像、没有阅读时长。
+
+     目次来自 front matter 的 toc 字段（有序数组），保持与正文 h2 严格对应。
+     条文序号由 CSS counter 自动生成，正文里不写死数字。 */ -}}
+
+{{- define "main" }}
+<article class="lj-doc">
+
+  {{/* ---------- 刊号戳 ---------- */}}
+  <div class="lj-docstamp">
+    <span class="lj-docstamp__no">{{ .Params.docno | default "刊务公告" }}</span>
+    <span class="lj-docstamp__kind">LOCUST JOURNAL</span>
+  </div>
+
+  {{/* ---------- 刊名 ---------- */}}
+  <header class="lj-masthead lj-masthead--compact">
+    <h1 class="lj-masthead__name">{{ .Params.doctitle | default .Title }}</h1>
+    <p class="lj-masthead__subtitle">{{ .Title }}</p>
+  </header>
+
+  <div class="lj-imprint">
+    <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">性质</span>非营利 · 娱乐模拟</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">编辑</span>LOCUST Journal Editorial Board</span>
+  </div>
+
+  {{/* ---------- 目次 ---------- */}}
+  {{- with .Params.toc }}
+  <nav class="lj-docnav" aria-label="本页目次">
+    <span class="lj-docnav__label">目　次</span>
+    <ol class="lj-docnav__list">
+      {{- range . }}
+        <li><a href="#{{ .anchor }}">{{ .text }}</a></li>
+      {{- end }}
+    </ol>
+  </nav>
+  {{- end }}
+
+  {{/* ---------- 条文正文 ---------- */}}
+  <div class="post-content lj-doc__body">
+    {{ .Content }}
+  </div>
+
+  {{/* ---------- 版权尾栏 ---------- */}}
+  <div class="lj-doc__colophon">
+    <span class="lj-doc__colophon-label">存档</span>
+    <span>本文自刊发之日起长期有效，不接受撤回申请。</span>
+  </div>
+
+</article>
+{{- end }}

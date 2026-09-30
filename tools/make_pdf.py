@@ -33,6 +33,7 @@ SRC_DIR = os.path.join(ROOT, "content", "articles", "vol1")
 OUT_DIR = os.path.join(ROOT, "static", "assets", "pdf", "vol1")
 
 ACCENT = colors.HexColor("#b45309")
+ACCENT_HEX = "#b45309"
 INK = colors.HexColor("#18181b")
 MUTED = colors.HexColor("#71717a")
 RULE = colors.HexColor("#d4d4d8")
@@ -317,6 +318,26 @@ def build_pdf(md_path, out_path, reg_font, bold_font):
             story += [tbl, Spacer(1, 8)]
         elif kind == "hr":
             story += [Spacer(1, 4), HRFlowable(width="100%", thickness=0.5, color=RULE), Spacer(1, 8)]
+
+    # 审稿意见书（从 front matter 的 review / locust_index / verdict 读，
+    # 与站点模板 lj-review 保持同一套字段）
+    review = meta.get("review", "").strip()
+    verdict = meta.get("verdict", "").strip()
+    if review:
+        story.append(Spacer(1, 12))
+        story.append(HRFlowable(width="100%", thickness=0.8, color=INK))
+        story.append(Spacer(1, 8))
+        story.append(Paragraph("审　稿　意　见　书", s_h2))
+        if locust_index:
+            story.append(Paragraph(
+                f'<font color="{ACCENT_HEX}"><b>蝗掠指数 {locust_index}</b></font> / 10',
+                s_meta))
+            story.append(Spacer(1, 4))
+        story.append(Paragraph(inline_markup(review), s_body))
+        if verdict:
+            story.append(Spacer(1, 6))
+            story.append(Paragraph(
+                f'审稿结论：<font color="{ACCENT_HEX}">{verdict}</font>', s_footnote))
 
     # 免责声明尾页
     story.append(Spacer(1, 14))

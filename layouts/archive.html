@@ -1,0 +1,115 @@
+{{- /* LOCUST Journal 总归档 —— 期刊总目录
+     形制对应真实期刊卷末的「总目次」：卷期逐卷列出，卷下挂全部条目与页码。
+     全部由内容自动汇总，新增稿件无需改这个模板。 */ -}}
+
+{{- define "main" }}
+<article class="lj-doc">
+
+  {{/* ---------- 刊号戳 ---------- */}}
+  <div class="lj-docstamp">
+    <span class="lj-docstamp__no">总　目　次</span>
+    <span class="lj-docstamp__kind">ARCHIVE</span>
+  </div>
+
+  {{/* ---------- 刊名 ---------- */}}
+  <header class="lj-masthead lj-masthead--compact">
+    <h1 class="lj-masthead__name">LOCUST JOURNAL</h1>
+    <p class="lj-masthead__subtitle">总归档</p>
+  </header>
+
+  <div class="lj-imprint">
+    <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">累计</span>{{ len (where site.RegularPages "Section" "articles") }} 篇蝗札 · {{ len (where site.RegularPages "Section" "scholar") }} 篇随笔</span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">编辑</span>LOCUST Journal Editorial Board</span>
+  </div>
+
+  {{/* ---------- 归档说明 ---------- */}}
+  <div class="post-content lj-doc__body">
+    {{ .Content }}
+  </div>
+
+  {{/* ---------- 逐卷目次 ---------- */}}
+  {{- $scholar := where site.RegularPages "Section" "scholar" }}
+  {{- $arts := where site.RegularPages "Section" "articles" }}
+  {{- $ordered := sort (where $arts "Params.seq" "!=" nil) "Params.seq" }}
+  {{- $unseq := where $arts "Params.seq" "==" nil }}
+
+  <section class="lj-volumes">
+
+    <div class="lj-volume">
+      <header class="lj-volume__head">
+        <h2 class="lj-volume__title">第 1 卷　内测号</h2>
+        <p class="lj-volume__meta">
+          <span>2026</span>
+          <span class="lj-volume__sep">·</span>
+          <span>{{ len $arts }} 篇</span>
+          <span class="lj-volume__sep">·</span>
+          <a href="{{ "articles/vol1/" | relURL }}">卷首页</a>
+        </p>
+      </header>
+
+      <ul class="lj-toc lj-toc--archive">
+        {{- range $ordered }}
+          <li class="lj-toc__item">
+            <div class="lj-toc__main">
+              <span class="lj-toc__index">p.{{ .Params.page | default "—" }}</span>
+              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span class="lj-toc__byline">{{ with .Params.authors }}{{ delimit . "、" }}{{ end }}</span>
+            </div>
+            <div class="lj-toc__meta">
+              <span class="lj-index__label">蝗掠指数</span>
+              <span class="lj-index">{{ .Params.locust_index | default "—" }}</span>
+            </div>
+          </li>
+        {{- end }}
+        {{- range $unseq }}
+          <li class="lj-toc__item">
+            <div class="lj-toc__main">
+              <span class="lj-toc__index">—</span>
+              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+            </div>
+            <div class="lj-toc__meta">
+              <span class="lj-index__label">蝗掠指数</span>
+              <span class="lj-index">{{ .Params.locust_index | default "—" }}</span>
+            </div>
+          </li>
+        {{- end }}
+      </ul>
+    </div>
+
+    {{/* ---------- 学社随笔总目 ---------- */}}
+    <div class="lj-volume">
+      <header class="lj-volume__head">
+        <h2 class="lj-volume__title">蝗客学社</h2>
+        <p class="lj-volume__meta">
+          <span>随笔栏目</span>
+          <span class="lj-volume__sep">·</span>
+          <span>不配发蝗掠指数</span>
+          <span class="lj-volume__sep">·</span>
+          <a href="{{ "scholar/" | relURL }}">栏目首页</a>
+        </p>
+      </header>
+
+      <ul class="lj-toc lj-toc--archive">
+        {{- range (sort $scholar "Date" "desc") }}
+          <li class="lj-toc__item">
+            <div class="lj-toc__main">
+              <span class="lj-toc__index">{{ .Date.Format "2006-01-02" }}</span>
+              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span class="lj-toc__byline">{{ with .Params.tags }}{{ delimit . "、" }}{{ end }}</span>
+            </div>
+          </li>
+        {{- end }}
+      </ul>
+    </div>
+
+  </section>
+
+  {{/* ---------- 版权尾栏 ---------- */}}
+  <div class="lj-doc__colophon">
+    <span class="lj-doc__colophon-label">存档</span>
+    <span>本刊所有卷期、蝗札、随笔永久存档，不删稿、不改稿。</span>
+  </div>
+
+</article>
+{{- end }}

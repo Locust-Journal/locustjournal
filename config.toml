@@ -43,8 +43,8 @@ mainSections = ["articles"]
     enable = false
   [params.assets]
     favicon = "images/favicon.png"
-  # 自定义样式（覆盖主题，不改 themes/）
-  customCSS = ["css/extend/custom.css"]
+  # 期刊排版样式走 assets/css/extended/（PaperMod 用 resources.Match 自动收录），
+  # 不需要也不能在这里配 customCSS —— 该主题版本不支持该参数。
 
 [menu]
   [[menu.main]]
@@ -84,6 +84,8 @@ mainSections = ["articles"]
 """
 
 [taxonomies]
+  # 保持 Hugo 默认的英文单复数（决定 URL 路径 /tags/ 与 /categories/）；
+  # 页面显示的中文刊名由 layouts/taxonomy.html 按 .Data.Plural 自行指定。
   tag = "tags"
   category = "categories"
 

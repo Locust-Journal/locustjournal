@@ -1,0 +1,115 @@
+{{- /* LOCUST Journal 列表页 —— 期刊目录形态
+     同一模板服务三种页面，靠 .Kind / .Data.Singular 区分：
+       /articles/     section  list → 栏目目录（要目）
+       /scholar/      section  list → 栏目目录（随笔）
+       /tags/ctf/     taxonomy term → 主题索引下的词条页
+     不显示 PaperMod 的文章卡片流与面包屑：期刊栏目页是目录，不是博文聚合。 */ -}}
+
+{{- define "main" }}
+{{- /* 词条页（/tags/ctf/）的 .Kind 是 "term"；taxonomy 总表（/tags/）走 terms.html。
+     注意别写成 "taxonomy"，那是总表页的 Kind。 */}}
+{{- $isTerm := eq .Kind "term" }}
+{{- /* 卷期页（/articles/vol1/）的 .Section 为空，需要回退到父栏目名 */}}
+{{- $sec := .Section }}
+{{- if not $sec }}{{ $sec = path.Base .File.Dir }}{{ end }}
+
+{{/* 词条页取 .Pages（该词条下的稿件），栏目页从 site 全局取。
+     注意：变量必须在 if 外用 := 预声明 —— 块内 := 的作用域不外传。 */}}
+{{- $pages := .Pages }}
+{{- if not $isTerm }}
+  {{- /* .RegularPages 不递归子 section。稿件放在 content/articles/vol1/ 下时，
+         /articles/ 页的 .RegularPages 长度为 0，目录会是空的，必须从全局按 Section 取。
+         where 只支持 = != in notin intersect，没有 Prefix / Match 操作符。 */}}
+  {{- $pages = where site.RegularPages "Section" $sec }}
+{{- end }}
+{{- $pages = sort $pages "Params.seq" }}
+{{- $arts := where $pages "Section" "articles" }}
+{{- $essays := where $pages "Section" "scholar" }}
+
+<article class="lj-home">
+
+  {{/* ---------- 刊头 ---------- */}}
+  <header class="lj-masthead">
+    <h1 class="lj-masthead__name">{{ .Title }}</h1>
+    <p class="lj-masthead__subtitle">
+      {{- if $isTerm }}词　条{{ else }}{{ .Params.subtitle | default "目　录" }}{{ end }}
+    </p>
+    <p class="lj-masthead__motto">
+      <span lang="en">Speeches fade, snacks remain.</span>
+      <span>报告转瞬即逝，茶歇亘古长存</span>
+    </p>
+  </header>
+
+  <div class="lj-imprint">
+    <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
+    <span class="lj-imprint__item">
+      <span class="lj-imprint__label">收录</span>
+      {{- if $isTerm }}本词条下 {{ len $pages }} 篇
+      {{- else }}蝗札 {{ len $arts }} 篇 · 随笔 {{ len $essays }} 篇{{ end }}
+    </span>
+    <span class="lj-imprint__item"><span class="lj-imprint__label">编辑</span>LOCUST Journal Editorial Board</span>
+  </div>
+
+  {{/* ---------- 栏目说明 ---------- */}}
+  {{- with .Content }}
+  <div class="post-content">
+    {{ . }}
+  </div>
+  {{- end }}
+
+  {{/* ---------- 正式条目（蝗札）---------- */}}
+  {{- if $arts }}
+  <h2 class="lj-section-head">
+    {{ if $isTerm }}正　文{{ else }}本 卷 目 录{{ end }}
+  </h2>
+  <ul class="lj-toc">
+    {{- range $arts }}
+      <li class="lj-toc__item">
+        <div class="lj-toc__main">
+          <span class="lj-toc__index">蝗札 {{ .Params.seq | default "—" }}</span>
+          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span class="lj-toc__byline">
+            {{- with .Params.authors }}{{ delimit . "、" }}{{ end }}
+            {{- with .Params.affiliation }}　{{ . }}{{ end }}
+            {{- with .Params.tags }}　{{ delimit . "、" }}{{ end }}
+          </span>
+          {{- with .Params.pdf }}
+            <a class="lj-toc__pdf" href="{{ . }}">PDF ↓</a>
+          {{- end }}
+        </div>
+        <div class="lj-toc__meta">
+          <span class="lj-index__label">蝗掠指数</span>
+          <span class="lj-index">{{ .Params.locust_index | default "—" }}</span>
+          <span class="lj-folio">第 1 卷 · p.{{ .Params.page | default "—" }}</span>
+        </div>
+      </li>
+    {{- end }}
+  </ul>
+  {{- end }}
+
+  {{/* ---------- 随笔条目 ----------
+       随笔不配发指数、不属正式刊载，视觉上轻一档，另起一节。 */}}
+  {{- if $essays }}
+  <h2 class="lj-section-head">学 社 随 笔</h2>
+  <ul class="lj-toc lj-toc--plain">
+    {{- range (sort $essays "Date" "desc") }}
+      <li class="lj-toc__item">
+        <div class="lj-toc__main">
+          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          {{- with (.Params.summary | default .Description) }}<span class="lj-toc__byline">{{ . }}</span>{{ end }}
+        </div>
+        <div class="lj-toc__meta">
+          <span class="lj-folio">不配发指数</span>
+        </div>
+      </li>
+    {{- end }}
+  </ul>
+  {{- end }}
+
+  {{/* ---------- 空态 ---------- */}}
+  {{- if not $pages }}
+  <p class="lj-doc__empty">本栏目暂无篇目。</p>
+  {{- end }}
+
+</article>
+{{- end }}

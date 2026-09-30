@@ -53,11 +53,18 @@ locustjournal/
 │       ├── _index.md
 │       ├── essay01.md  essay02.md  essay03.md
 ├── layouts/                 # 覆盖主题模板（不改 themes/）
-│   ├── 404.html             # 期刊语气 404 页
 │   ├── baseof.html          # 替换废弃的 .Language.LanguageDirection
+│   ├── index.html           # 首页：封面 + 本卷要目
+│   ├── imprint.html         # 刊务公告页（发刊宗旨 / 投稿须知 / 编委会）
+│   ├── archive.html         # 总归档：逐卷总目次
+│   ├── 404.html             # 期刊语气 404 页
 │   ├── rss.xml              # 替换废弃的 .Language.LanguageCode
+│   ├── _default/
+│   │   ├── single.html      # 蝗札单篇：篇首 + 摘要框 + 审稿意见书
+│   │   └── list.html        # 栏目目录页
+│   ├── scholar/single.html  # 学社随笔单篇（独立版式，不配指数）
 │   └── _partials/templates/opengraph.html
-├── assets/css/extend/       # 自定义样式（字体栈 / 表格 / 窄屏导航）
+├── assets/css/extended/     # 期刊样式（PaperMod 用 resources.Match 自动收录）
 ├── static/assets/           # 静态资源
 │   ├── images/              # favicon / logo / locust.svg
 │   └── pdf/vol1/            # 稿件 PDF（由 tools/make_pdf.py 生成）
@@ -82,9 +89,11 @@ locustjournal/
 ### 新增一篇蝗札
 
 1. 复制 `content/articles/vol1/article01.md` 到对应卷期目录
-2. 填写 front matter（`title` / `authors` / `date` / `tags` / `locust_index` / `vol`）
-3. 文末加审稿块（蝗掠指数 + 巡食官评语 + 审稿结论）
-4. 更新 `content/articles/_index.md` 的表格
+2. 填 front matter：`title` / `titleEn` / `authors` / `affiliation` / `date` / `tags` /
+   `vol` / **`seq`**（篇序，决定目录顺序）/ **`page`**（页码）/ **`locust_index`** /
+   **`review`**（巡食官评语，支持 `**加粗**`）/ **`verdict`** / `pdf`
+3. 正文不要再写一级标题和审稿块 —— 篇首与审稿意见书都由 `single.html` 输出
+4. 目录页、首页要目、归档总目会**自动收录**，无需改任何模板
 5. 重新生成 PDF：`python tools/make_pdf.py`
 6. 跑一次 `hugo --gc --minify --panicOnWarning` 确认零警告
 
@@ -105,7 +114,23 @@ locustjournal/
 ## 约定与踩坑记录
 
 **主题不要直接改**：`themes/PaperMod/` 是 submodule。需要改样式/模板时，在项目根的
-`layouts/` 或 `assets/css/extend/custom.css` 里覆盖，否则主题更新会冲掉。
+`layouts/` 或 `assets/css/extended/locust-journal.css` 里覆盖，否则主题更新会冲掉。
+
+**样式加载路径**：PaperMod 用 `resources.Match "css/extended/*.css"` 自动收录，
+所以样式必须放 `assets/css/extended/`。**不要在 config.toml 里配 `customCSS`** ——
+该主题版本不支持这个参数，配了不生效反而误导。
+
+**Hugo 模板作用域**：块内 `{{ $x := ... }}` 的作用域不外传，要跨 `if` 复用必须
+在外层先 `{{ $x := ... }}` 声明、块内用 `{{ $x = ... }}` 赋值，否则报
+`undefined variable "$x"`。
+
+**`.RegularPages` 不递归子 section**：稿件放在 `content/articles/vol1/` 时，
+`/articles/` 页的 `.RegularPages` 长度为 0，目录会是空的。必须从全局取：
+`where site.RegularPages "Section" .Section`。`where` 只支持 `= != in notin intersect`，
+没有 `Prefix` / `Match` 操作符。
+
+**Hugo 注释不能嵌套 `*/`**：跨行注释里再出现 `*/` 会提前闭合，报
+`comment ends before closing delimiter`。拆成两行或换措辞。
 
 **Hugo 0.158+ 字段改名**（本项目已全部覆盖，勿退回旧写法）：
 
@@ -132,13 +157,20 @@ reportlab 都不认，脚本会自动回退到 `/Library/Fonts/Arial Unicode.ttf
 **视觉审计**：
 
 ```bash
-hugo server -D &
+hugo --gc --minify                       # 先出静态产物
+/Users/dynooob/.workbuddy/binaries/python/versions/3.13.12/bin/python3 \
+  -m http.server 1313 --bind 127.0.0.1 --directory public &   # 必须后台常驻
 NODE_PATH=/Users/dynooob/.workbuddy/binaries/node/workspace/node_modules \
+  OUT=/tmp/lj-audit \
   /Users/dynooob/.workbuddy/binaries/node/versions/22.22.2/bin/node tools/visual_audit.js
 ```
 
 13 条路由 × 桌面/移动双视口，检查资源 404、横向溢出、WCAG 对比度、零尺寸元素。
-截图落在 `/tmp/locust-audit/`。
+截图落在 `$OUT/`。
+
+**审计报告里这两类是已知误报，不用管**：
+- `livereload.js` 404 —— `hugo server` 的调试脚本，静态 `public/` 与生产环境都没有
+- `/nope-404/` 404 —— 那就是 404 页本身，预期行为
 
 ---
 

@@ -1,41 +1,47 @@
 /* ============================================================================
-   LOCUST Journal《学术蝗虫》— 期刊排版系统
+   LOCUST Journal《学术蝗虫》— 学术索引式排版系统
    ----------------------------------------------------------------------------
-   设计目标：让站点具备「学术期刊」的制度感符号，而非博客观感。
+   排版基准来自对真实学术站点的实测探针（arXiv / JSTOR / bioRxiv / DOAJ），
+   而非凭感觉的"期刊感"。实测结论：
 
-   期刊之所以像期刊，靠的是这套可识别的物理结构：
-     1. 刊头 masthead    —— 居中、大写字距、 ISSN/卷期行
-     2. 栏线 column rule —— 分隔线带（真期刊用细线分栏）
-     3. 篇首 article head—— 标题 + 作者单位 + 摘要框
-     4. 要目 table of contents —— 标题 / 作者 / 指数 / 页码，带悬挂点引线
-     5. 页眉页脚 folio   —— 卷号 + 页码
-     6. 参考文献悬挂缩进 hanging indent
-     7. 首行缩进 + 两端对齐（学术正文规范）
+     arXiv  list/cs.AI/recent
+       body            #fff 底 / #000 正文 / 16px
+       letter-spacing  normal（标题、作者、分类全部 normal）
+       text-transform  none
+       hr / 边框装饰   0 处
+       层级            靠缩进：dd margin-left 40px
+       字号阶梯        18px/700 标题 → 14.3px 作者 → 11.7px 分类
+       强调色          只有链接蓝，数字不带状态色
 
-   全部通过覆盖实现，不修改 themes/PaperMod/。
+   期刊制度感来自信息密度、缩进分层、克制配色，
+   不来自居中大字、字距、边框和徽章。本文件按此重写。
+
+   类名与 themes/PaperMod/ 的覆盖点全部保留，避免模板断裂。
    ========================================================================== */
 
 :root {
-  /* ---- 字体 ----
-     刊名与西文用衬线（学术气质），中文正文用宋体系（期刊感优于黑体） */
+  /* ---- 字体：与实测基准一致走无衬线，衬线只留给正文 ---- */
+  --lj-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    sans-serif;
   --lj-serif: "Songti SC", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC",
     "Times New Roman", Georgia, serif;
-  --lj-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --lj-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
-  /* ---- 色板：赭石（蝗虫色）为主，墨黑为字，纸白为底 ---- */
-  --lj-ink: #1c1917;          /* 正文墨色（比纯黑柔和） */
-  --lj-ink-soft: #57534e;     /* 次级文字 */
-  --lj-ink-faint: #a8a29e;    /* 页码/页眉等最弱信息 */
-  --lj-paper: #fffefb;        /* 纸白（微暖，区别于纯白的屏幕白） */
-  --lj-rule: #d6d3d1;         /* 栏线 */
-  --lj-rule-strong: #1c1917;  /* 主栏线（刊头下方） */
-  --lj-accent: #b45309;       /* 赭石：刊名点缀、指数、强调 */
-  --lj-accent-soft: #fef3c7;  /* 赭石浅底：摘要框 */
+  /* ---- 色板：纯白底 + 纯黑字 + 单一强调色。
+     赭石降级为"警示"专用色，不再承担标题 / 链接 / 徽章的常规强调，
+     避免整页被同一个色相刷满（那正是 AI 生成站点的典型观感）。 ---- */
+  --lj-ink: #000;             /* 正文墨色：纯黑 */
+  --lj-ink-soft: #444;        /* 次级文字：作者、说明 */
+  --lj-ink-faint: #777;       /* 三级：页码、编号、元信息 */
+  --lj-paper: #fff;           /* 纸白：纯白，无暖调 */
+  --lj-rule: #d5d5d5;         /* 栏线：浅灰 */
+  --lj-rule-strong: #000;     /* 主栏线 */
+  --lj-accent: #0b57a4;       /* 链接蓝：与 arXiv 一致，唯一常规强调色 */
+  --lj-warn: #8a4b00;         /* 免责 / 声明专用暖色，极少量使用 */
 
   --theme-font-family: var(--lj-sans);
-  --content-font-size: 17px;
+  --content-font-size: 15px;
   --theme-color: var(--lj-accent);
 }
 
@@ -43,44 +49,87 @@ body {
   background: var(--lj-paper);
   color: var(--lj-ink);
   font-family: var(--lj-sans);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 全站文字默认不继承字距与大小写变换 —— 实测基准里两值均为 normal/none */
+body * {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* PaperMod 默认给 body 加了主色，这里拉回黑色 */
+.post-content,
+.post-title,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--lj-ink);
 }
 
 /* ============================================================================
    一、刊头 Masthead
+   真实期刊目录页的标题是左对齐、单行、可扫读的，
+   不是居中大字加字距。这里保留刊名的庄重感，但靠字号与下方细线建立权重。
    ========================================================================== */
 
 .lj-masthead {
-  text-align: center;
-  padding: 2.2rem 0 0;
-  margin-bottom: 1.4rem;
+  padding: 1.6rem 0 0.7rem;
+  margin: 0 0 0.9rem;
+  border-bottom: 2px solid var(--lj-rule-strong);
 }
 
 .lj-masthead__name {
-  font-family: var(--lj-serif);
-  font-size: clamp(2.1rem, 6.5vw, 3.4rem);
-  font-weight: 400;
-  letter-spacing: 0.16em;
-  text-indent: 0.16em;
-  line-height: 1.1;
+  font-family: var(--lj-sans);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
   color: var(--lj-ink);
   margin: 0;
 }
 
 .lj-masthead__subtitle {
-  font-family: var(--lj-serif);
-  font-size: clamp(1rem, 2.6vw, 1.3rem);
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
+  font-family: var(--lj-sans);
+  font-size: 1rem;
+  font-weight: 400;
   color: var(--lj-ink-soft);
-  margin: 0.5rem 0 0;
+  margin: 0.3rem 0 0;
+}
+
+/* 刊名行的中文刊名：与西文同处一行，弱化为灰色，不另起居中副题 */
+.lj-masthead__cn {
+  font-weight: 400;
+  font-size: 0.72em;
+  color: var(--lj-ink-soft);
+  margin-left: 0.5em;
+}
+
+/* 首页底部编务链接：横排文字链接，不用居中点分隔 */
+.lj-home__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1.2rem;
+  text-indent: 0;
+}
+
+.lj-home__links a {
+  color: var(--lj-accent);
+  text-decoration: none;
+}
+
+.lj-home__links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .lj-masthead__motto {
-  margin-top: 0.9rem;
-  font-family: var(--lj-serif);
+  margin: 0.5rem 0 0;
+  font-family: var(--lj-sans);
   font-size: 0.82rem;
-  font-style: italic;
-  letter-spacing: 0.06em;
   color: var(--lj-ink-faint);
 }
 
@@ -89,93 +138,83 @@ body {
 }
 
 .lj-masthead__motto span + span {
-  margin-top: 0.15rem;
-  font-style: normal;
-  letter-spacing: 0.16em;
+  margin-top: 0.1rem;
 }
 
-/* 刊头下的三段式元信息行：卷期 |  ISSN |  编辑部 */
+/* 刊头元信息行：卷期 / 刊号 / 编辑部
+   改成左对齐的行内元信息，字段之间用间隔而非竖线分隔，
+   避免"居中徽章行"的落地页观感。 */
 .lj-imprint {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: baseline;
-  gap: 0;
-  margin: 1.5rem 0 0;
-  padding: 0.55rem 0;
-  border-top: 2px solid var(--lj-rule-strong);
+  gap: 0.15rem 1.1rem;
+  margin: 0 0 1.2rem;
+  padding: 0.45rem 0;
   border-bottom: 1px solid var(--lj-rule);
-  font-family: var(--lj-serif);
-  font-size: 0.76rem;
-  letter-spacing: 0.12em;
+  font-family: var(--lj-sans);
+  font-size: 0.78rem;
   color: var(--lj-ink-soft);
 }
 
 .lj-imprint__item {
-  padding: 0 1.1rem;
   white-space: nowrap;
 }
 
-.lj-imprint__item + .lj-imprint__item {
-  border-left: 1px solid var(--lj-rule);
-}
-
 .lj-imprint__item--accent {
-  color: var(--lj-accent);
+  color: var(--lj-ink);
+  font-weight: 500;
 }
 
 .lj-imprint__label {
   color: var(--lj-ink-faint);
-  margin-right: 0.4em;
+  margin-right: 0.35em;
 }
 
 /* ============================================================================
    二、栏线 Column Rules
-   真期刊用细竖线分栏，这里用横线模拟「分节栏线」
    ========================================================================== */
 
 .lj-rule {
   border: 0;
   border-top: 1px solid var(--lj-rule);
-  margin: 2.2rem 0;
+  margin: 1.8rem 0;
 }
 
 .lj-rule--thick {
-  border-top: 2px solid var(--lj-rule-strong);
+  border-top: 1px solid var(--lj-rule-strong);
 }
 
 .lj-rule--double {
   border: 0;
-  border-top: 3px double var(--lj-rule-strong);
-  margin: 1.6rem 0;
+  border-top: 1px solid var(--lj-rule);
+  margin: 1.4rem 0;
 }
 
-/* 分节标题：带编号的学术论文式小标题 */
+/* 分节标题：左对齐、纯黑、无装饰横线。
+   实测基准里 h2 是 19.44px/700/#000/左对齐，没有任何两侧横线。 */
 .lj-section-head {
-  font-family: var(--lj-serif);
-  font-size: 0.82rem;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-indent: 0.2em;
-  text-transform: uppercase;
-  color: var(--lj-accent);
-  text-align: center;
-  margin: 2.6rem 0 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  font-family: var(--lj-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--lj-ink);
+  text-align: left;
+  margin: 1.9rem 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--lj-rule);
+  display: block;
 }
 
 .lj-section-head::before,
 .lj-section-head::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--lj-rule);
+  content: none;
 }
 
 /* ============================================================================
    三、要目 Table of Contents
-   真期刊目录：标题 / 作者 / 页码，用点引线连接
+   核心改动：从"网格 + 右侧徽章列"改为"左对齐连续条目 + 缩进分层"。
+   每个条目 = 一行标题（18px/700）+ 下方元信息行（作者 · 指数 · 页码）。
+   指数不再装框，改为与页码同级的普通数字。
    ========================================================================== */
 
 .lj-toc {
@@ -185,317 +224,330 @@ body {
 }
 
 .lj-toc__item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: 0 1rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px dotted var(--lj-rule);
+  display: block;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--lj-rule);
 }
 
-.lj-toc__item:first-child {
-  border-top: 1px solid var(--lj-rule);
+.lj-toc__item:last-child {
+  border-bottom: 0;
 }
 
 .lj-toc__main {
   min-width: 0;
 }
 
+/* 篇次：作为标题上方的灰色小标签，左对齐 */
 .lj-toc__index {
-  font-family: var(--lj-serif);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  color: var(--lj-accent);
   display: block;
-  margin-bottom: 0.2rem;
+  font-family: var(--lj-sans);
+  font-size: 0.72rem;
+  color: var(--lj-ink-faint);
+  margin-bottom: 0.15rem;
 }
 
 .lj-toc__title {
-  font-family: var(--lj-serif);
-  font-size: 1.06rem;
-  line-height: 1.5;
-  color: var(--lj-ink);
   display: block;
+  font-family: var(--lj-sans);
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--lj-ink);
 }
 
 .lj-toc__title a {
-  color: inherit;
+  color: var(--lj-accent);
   text-decoration: none;
 }
 
 .lj-toc__title a:hover {
-  color: var(--lj-accent);
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 2px;
 }
 
+/* 元信息行：作者 · 单位 · 关键词，全部灰色同层 */
 .lj-toc__byline {
-  font-size: 0.78rem;
-  color: var(--lj-ink-soft);
-  margin-top: 0.3rem;
   display: block;
-  line-height: 1.7;
+  font-size: 0.82rem;
+  color: var(--lj-ink-soft);
+  margin-top: 0.2rem;
+  line-height: 1.55;
 }
 
+/* PDF 链接：普通小字链接，不装框 */
 .lj-toc__pdf {
   display: inline-block;
-  margin-top: 0.45rem;
-  font-family: var(--lj-serif);
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
+  margin-top: 0.3rem;
+  font-size: 0.76rem;
   color: var(--lj-accent);
-  border: 1px solid var(--lj-rule);
-  border-radius: 2px;
-  padding: 0.1rem 0.5rem;
   text-decoration: none;
 }
 
 .lj-toc__pdf:hover {
-  border-color: var(--lj-accent);
-  background: var(--lj-accent-soft);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
+/* 元信息不再独立成右列，改为条目下方的横向一行 */
 .lj-toc__meta {
-  text-align: right;
-  white-space: nowrap;
-  font-family: var(--lj-serif);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.9rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--lj-ink-faint);
 }
 
-/* 蝗掠指数徽记 */
+/* 蝗掠指数：去掉边框徽章，改为纯数字 */
 .lj-index {
-  display: inline-block;
-  font-size: 0.74rem;
-  letter-spacing: 0.06em;
-  color: var(--lj-accent);
-  border: 1px solid var(--lj-accent);
-  border-radius: 2px;
-  padding: 0.12rem 0.42rem;
-  line-height: 1.3;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--lj-ink);
+  font-variant-numeric: tabular-nums;
+  border: 0;
+  padding: 0;
 }
 
 .lj-index__label {
-  display: block;
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
+  display: inline;
+  font-size: 0.78rem;
   color: var(--lj-ink-faint);
   border: 0;
-  margin-bottom: 0.28rem;
-  text-align: right;
+  margin: 0 0.3em 0 0;
+  text-align: left;
 }
 
 .lj-folio {
-  display: block;
-  font-size: 0.74rem;
+  display: inline;
+  font-size: 0.78rem;
   color: var(--lj-ink-faint);
-  margin-top: 0.35rem;
-  letter-spacing: 0.08em;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ============================================================================
    四、篇首 Article Head + 摘要框
+   改为左对齐论文篇首：题名 → 英文题名 → 作者 → 单位 → 摘要 → 关键词
+   摘要框去掉赭石底色与左侧色条，改为上下细线包裹的缩进块。
    ========================================================================== */
 
 .lj-article-head {
-  text-align: center;
-  padding-bottom: 1.3rem;
-  margin-bottom: 1.6rem;
+  text-align: left;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
   border-bottom: 2px solid var(--lj-rule-strong);
 }
 
 .lj-article-head__kicker {
-  font-family: var(--lj-serif);
-  font-size: 0.74rem;
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
-  text-transform: uppercase;
-  color: var(--lj-accent);
-  margin-bottom: 0.7rem;
+  font-size: 0.76rem;
+  color: var(--lj-ink-faint);
+  margin: 0 0 0.35rem;
 }
 
 .lj-article-head__title {
-  font-family: var(--lj-serif);
-  font-size: clamp(1.5rem, 4.2vw, 2.1rem);
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  font-family: var(--lj-sans);
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.35;
   color: var(--lj-ink);
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.lj-article-head__titleEn {
+  font-family: var(--lj-sans);
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--lj-ink-soft);
+  margin: 0 0 0.7rem;
+  line-height: 1.5;
 }
 
 .lj-article-head__authors {
-  font-size: 0.92rem;
-  color: var(--lj-ink-soft);
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--lj-ink);
+  margin: 0 0 0.15rem;
 }
 
 .lj-article-head__affil {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--lj-ink-faint);
-  margin-bottom: 0.7rem;
+  margin: 0 0 0.7rem;
 }
 
-/* 摘要框：期刊摘要惯例是缩进小字 + 上下细线 */
+/* 摘要：上下细线 + 左缩进，无底色 */
 .lj-abstract {
-  margin: 1.5rem 0 0;
-  padding: 1.05rem 1.3rem;
-  background: var(--lj-accent-soft);
-  border-left: 3px solid var(--lj-accent);
+  margin: 1rem 0 0;
+  padding: 0.8rem 0 0.8rem 1rem;
+  border-top: 1px solid var(--lj-rule);
+  border-bottom: 1px solid var(--lj-rule);
+  border-left: 2px solid var(--lj-ink-faint);
+  background: transparent;
   text-align: left;
 }
 
 .lj-abstract__label {
-  font-family: var(--lj-serif);
-  font-size: 0.74rem;
-  letter-spacing: 0.2em;
-  color: var(--lj-accent);
-  margin-bottom: 0.5rem;
+  font-size: 0.76rem;
+  color: var(--lj-ink-faint);
+  margin: 0 0 0.35rem;
 }
 
 .lj-abstract__body {
-  font-size: 0.92rem;
-  line-height: 1.8;
+  font-size: 0.88rem;
+  line-height: 1.7;
   color: var(--lj-ink);
   margin: 0;
 }
 
 .lj-keywords {
-  margin: 1rem 0 0;
+  margin: 0.8rem 0 0;
   font-size: 0.8rem;
   color: var(--lj-ink-soft);
   text-align: left;
 }
 
 .lj-keywords__label {
-  font-family: var(--lj-serif);
-  letter-spacing: 0.16em;
-  color: var(--lj-accent);
-  margin-right: 0.5em;
+  color: var(--lj-ink-faint);
+  margin-right: 0.4em;
 }
 
 /* ============================================================================
    五、正文学术排版
+   正文用衬线（中文长文可读性），标题用无衬线粗体（与基准一致）。
+   保留首行缩进与两端对齐 —— 这是中文期刊正文规范，不属于 AI 感来源。
    ========================================================================== */
 
 .post-content {
   font-family: var(--lj-serif);
-  font-size: 1.02rem;
-  line-height: 1.95;
+  font-size: 1rem;
+  line-height: 1.85;
   color: var(--lj-ink);
   text-align: justify;
   text-justify: inter-ideograph;
 }
 
-/* 章节标题：编号 + 细线，学术论文式 */
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+  font-family: var(--lj-sans);
+  font-weight: 700;
+}
+
 .post-content h2 {
-  font-family: var(--lj-serif);
-  font-size: 1.24rem;
-  font-weight: 400;
+  font-size: 1.15rem;
   color: var(--lj-ink);
-  margin: 2.4rem 0 1rem;
-  padding-bottom: 0.45rem;
+  margin: 2rem 0 0.8rem;
+  padding-bottom: 0.25rem;
   border-bottom: 1px solid var(--lj-rule);
-  letter-spacing: 0.02em;
 }
 
 .post-content h3 {
-  font-family: var(--lj-serif);
-  font-size: 1.06rem;
-  font-weight: 400;
+  font-size: 1.02rem;
   color: var(--lj-ink);
-  margin: 1.7rem 0 0.7rem;
+  margin: 1.5rem 0 0.6rem;
 }
 
 .post-content h4 {
-  font-size: 0.98rem;
-  font-weight: 400;
-  color: var(--lj-ink-soft);
-  margin: 1.4rem 0 0.6rem;
+  font-size: 0.95rem;
+  color: var(--lj-ink);
+  margin: 1.2rem 0 0.5rem;
 }
 
-/* 中文正文首行缩进两字符（学术规范） */
 .post-content > p {
   text-indent: 2em;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.8rem;
 }
 
-/* 摘要、列表、表格、代码块内的段落不缩进 */
 .post-content blockquote p,
 .post-content ul p,
 .post-content ol p,
 .post-content table p,
-.post-content pre + p {
+.post-content pre + p,
+.post-content .lj-abstract p,
+.post-content .lj-review p {
   text-indent: 0;
 }
 
-/* 列表用中文顿号风格 */
 .post-content ul,
 .post-content ol {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.6rem;
 }
 
 .post-content li {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
 }
 
-/* 强调：不用粗体泛滥，用墨色加深的衬线 */
+.post-content ol li::marker,
+.post-content ul li::marker {
+  color: var(--lj-ink-faint);
+}
+
+/* 强调：回到真正的粗体，不再用"墨色 + 下边框"的伪强调 */
 .post-content strong {
-  font-weight: 400;
-  color: var(--lj-accent);
-  border-bottom: 1px solid rgba(180, 83, 9, 0.32);
+  font-weight: 700;
+  color: var(--lj-ink);
 }
 
-/* 链接：赭石 + 下划线 */
+/* 链接：蓝色下划线 */
 .post-content a {
   color: var(--lj-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-underline-offset: 2px;
 }
 
 .post-content a:hover {
   color: var(--lj-ink);
 }
 
-/* 引用块：审稿意见、局限性声明 */
 .post-content blockquote {
-  border-left: 2px solid var(--lj-accent);
-  padding: 0.2rem 0 0.2rem 1.1rem;
-  margin: 1.4rem 0;
+  border-left: 2px solid var(--lj-rule-strong);
+  padding: 0.1rem 0 0.1rem 1rem;
+  margin: 1.2rem 0;
   color: var(--lj-ink-soft);
   font-size: 0.94rem;
-  line-height: 1.85;
+  line-height: 1.75;
   background: transparent;
 }
 
 .post-content blockquote strong {
-  border-bottom: 0;
-  color: var(--lj-accent);
+  color: var(--lj-ink);
 }
 
-/* 表格：学术三线表 */
+.post-content blockquote > p:first-child {
+  margin-top: 0;
+}
+
+.post-content blockquote > p:last-child {
+  margin-bottom: 0;
+}
+
+/* 表格：保持学术三线表 */
 .post-content table {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--lj-sans);
-  font-size: 0.86rem;
-  margin: 1.4rem 0;
+  font-size: 0.84rem;
+  margin: 1.2rem 0;
   border-top: 2px solid var(--lj-rule-strong);
   border-bottom: 2px solid var(--lj-rule-strong);
 }
 
 .post-content table thead th {
   background: transparent;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.8rem;
-  letter-spacing: 0.06em;
   color: var(--lj-ink);
   border-bottom: 1px solid var(--lj-rule);
-  padding: 0.6em 0.75em;
+  padding: 0.5em 0.6em;
   text-align: left;
 }
 
 .post-content table tbody td {
-  padding: 0.55em 0.75em;
+  padding: 0.45em 0.6em;
   border-bottom: 1px solid var(--lj-rule);
   vertical-align: top;
 }
@@ -504,23 +556,18 @@ body {
   border-bottom: 0;
 }
 
-/* 代码块：等宽 + 浅底 */
+/* 代码块：浅灰底、零圆角、块内横向滚动 */
 .post-content pre,
 .post-content div.highlight {
-  background: #f5f5f4 !important;
+  background: #f7f7f7 !important;
   border: 1px solid var(--lj-rule);
-  border-radius: 2px;
+  border-radius: 0;
   font-size: 0.82rem;
-  line-height: 1.7;
-  /* 关键：长行在块内横向滚动，不撑破页面（移动端曾溢出 484px > 375px） */
+  line-height: 1.65;
   max-width: 100%;
   overflow-x: auto;
 }
 
-/* Chroma 高亮的内部结构也要能收缩，否则会顶破容器。
-   PaperMod 把 pre>code 设成 display:grid，长行会按内容宽度撑开（实测 484px > 375px），
-   必须让 code 自身可收缩并由 pre 承担横向滚动。
-   注意：本文件被 concat 到 extended.css，选择器特异性要压过主题的 .md-content pre code。 */
 .post-content div.highlight pre.chroma,
 article.post-content div.highlight pre.chroma {
   max-width: 100% !important;
@@ -542,10 +589,10 @@ article.post-content div.highlight pre.chroma > code {
 .post-content code {
   font-family: var(--lj-mono);
   font-size: 0.85em;
-  background: #f5f5f4;
+  background: #f2f2f2;
   color: var(--lj-ink);
-  padding: 0.1rem 0.3rem;
-  border-radius: 2px;
+  padding: 0.08rem 0.28rem;
+  border-radius: 0;
 }
 
 .post-content pre code {
@@ -558,16 +605,16 @@ article.post-content div.highlight pre.chroma > code {
   counter-reset: ref;
   list-style: none;
   padding: 0;
-  margin: 0.6rem 0 0;
+  margin: 0.5rem 0 0;
 }
 
 .lj-references li {
   counter-increment: ref;
   position: relative;
   padding-left: 2.1em;
-  margin-top: 0.5rem;
-  font-size: 0.88rem;
-  line-height: 1.7;
+  margin-top: 0.4rem;
+  font-size: 0.86rem;
+  line-height: 1.65;
   color: var(--lj-ink-soft);
   text-align: left;
 }
@@ -576,19 +623,23 @@ article.post-content div.highlight pre.chroma > code {
   content: "[" counter(ref) "]";
   position: absolute;
   left: 0;
-  color: var(--lj-accent);
-  font-family: var(--lj-serif);
+  color: var(--lj-ink-faint);
+  font-family: var(--lj-sans);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ============================================================================
-   六、审稿意见书（文末评审块）
+   六、审稿意见书
+   改为普通区块：上下细线，无底色、无边框盒。
    ========================================================================== */
 
 .lj-review {
-  margin: 2.4rem 0 0;
-  padding: 1.2rem 1.4rem;
-  border: 1px solid var(--lj-rule);
-  background: #fafaf9;
+  margin: 2rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 2px solid var(--lj-rule-strong);
+  border-bottom: 1px solid var(--lj-rule);
+  background: transparent;
+  border-left: 0;
 }
 
 .lj-review__head {
@@ -596,67 +647,71 @@ article.post-content div.highlight pre.chroma > code {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.6rem;
-  padding-bottom: 0.7rem;
-  margin-bottom: 0.9rem;
+  gap: 0.3rem 1rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   border-bottom: 1px solid var(--lj-rule);
 }
 
 .lj-review__title {
-  font-family: var(--lj-serif);
-  font-size: 0.78rem;
-  letter-spacing: 0.2em;
-  color: var(--lj-ink-soft);
+  font-family: var(--lj-sans);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--lj-ink);
   margin: 0;
 }
 
 .lj-review__score {
-  font-family: var(--lj-serif);
-  font-size: 0.82rem;
+  font-family: var(--lj-sans);
+  font-size: 0.8rem;
   color: var(--lj-ink-soft);
+  margin: 0;
 }
 
 .lj-review__score b {
-  font-size: 1.05rem;
-  color: var(--lj-accent);
-  font-weight: 400;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lj-ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .lj-review__body {
-  font-size: 0.92rem;
-  line-height: 1.85;
+  font-size: 0.9rem;
+  line-height: 1.75;
   color: var(--lj-ink);
   text-align: left;
 }
 
 .lj-review__body p {
-  margin: 0;
+  margin: 0 0 0.6rem;
   text-indent: 0;
 }
 
+.lj-review__body p:last-child {
+  margin-bottom: 0;
+}
+
 .lj-review__body strong {
-  color: var(--lj-accent);
-  font-weight: 400;
-  border-bottom: 1px solid rgba(180, 83, 9, 0.3);
+  color: var(--lj-ink);
+  font-weight: 700;
 }
 
 .lj-review__verdict {
-  margin-top: 0.9rem;
-  padding-top: 0.8rem;
-  border-top: 1px dotted var(--lj-rule);
-  font-size: 0.86rem;
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--lj-rule);
+  font-size: 0.84rem;
   color: var(--lj-ink-soft);
+  margin-bottom: 0;
 }
 
 .lj-review__verdict b {
-  font-family: var(--lj-serif);
-  letter-spacing: 0.14em;
-  color: var(--lj-accent);
-  font-weight: 400;
+  font-weight: 700;
+  color: var(--lj-ink);
 }
 
 /* ============================================================================
-   七、页眉 / 页脚 Folio
+   七、页眉 / 页脚
    ========================================================================== */
 
 .header {
@@ -666,20 +721,18 @@ article.post-content div.highlight pre.chroma > code {
 
 .header-nav {
   max-width: 1100px;
-  line-height: 52px;
+  line-height: 46px;
 }
 
 .logo a {
-  font-family: var(--lj-serif);
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.14em;
+  font-family: var(--lj-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--lj-ink);
 }
 
 .menu a {
   font-size: 0.8rem;
-  letter-spacing: 0.1em;
   color: var(--lj-ink-soft);
 }
 
@@ -688,66 +741,63 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 .menu .active {
-  color: var(--lj-accent);
-  font-weight: 400;
+  color: var(--lj-ink);
+  font-weight: 700;
   text-decoration: none;
-  box-shadow: inset 0 -1px 0 var(--lj-accent);
+  box-shadow: inset 0 -2px 0 var(--lj-ink);
 }
 
 .footer {
-  border-top: 2px double var(--lj-rule-strong);
-  margin-top: 3.5rem;
-  font-family: var(--lj-serif);
+  border-top: 1px solid var(--lj-rule);
+  margin-top: 3rem;
+  font-family: var(--lj-sans);
   color: var(--lj-ink-soft);
 }
 
 .footer-inner {
   max-width: 1100px;
-  padding-top: 1.4rem;
-  padding-bottom: 1.6rem;
+  padding-top: 1.2rem;
+  padding-bottom: 1.4rem;
 }
 
 .footer .footer-copyright {
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
 }
 
 .footer .footer-message {
-  font-size: 0.76rem;
-  line-height: 1.8;
+  font-size: 0.75rem;
+  line-height: 1.7;
   color: var(--lj-ink-faint);
   max-width: 46em;
-  margin: 0.7rem auto 0;
+  margin: 0.6rem auto 0;
   text-align: center;
 }
 
-/* 去掉 PaperMod 默认的 "Powered by Hugo & PaperMod" 视觉噪音 */
 .footer .powered-by {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--lj-ink-faint);
   opacity: 0.7;
 }
 
 /* ============================================================================
    八、免责声明条
+   唯一保留暖色的地方：免责声明确实需要被看见，但降为单行细边注记。
    ========================================================================== */
 
 .lj-disclaimer {
   border: 1px solid var(--lj-rule);
-  border-left: 3px solid var(--lj-accent);
-  padding: 0.85rem 1.1rem;
-  margin: 0 0 2rem;
+  border-left: 2px solid var(--lj-warn);
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1.4rem;
   font-size: 0.8rem;
-  line-height: 1.75;
+  line-height: 1.7;
   color: var(--lj-ink-soft);
-  background: #fafaf9;
+  background: transparent;
 }
 
 .lj-disclaimer b {
-  font-family: var(--lj-serif);
-  letter-spacing: 0.1em;
-  color: var(--lj-accent);
-  font-weight: 400;
+  color: var(--lj-ink);
+  font-weight: 700;
 }
 
 /* ============================================================================
@@ -755,137 +805,124 @@ article.post-content div.highlight pre.chroma > code {
    ========================================================================== */
 
 .breadcrumb {
-  font-family: var(--lj-serif);
   font-size: 0.74rem;
-  letter-spacing: 0.1em;
-}
-
-.post-meta {
-  font-family: var(--lj-serif);
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
   color: var(--lj-ink-faint);
 }
 
+.post-meta {
+  font-size: 0.76rem;
+  color: var(--lj-ink-faint);
+}
+
+/* 标签：纯文字链接，不装框 */
 .tags a {
-  font-family: var(--lj-serif);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: var(--lj-ink-soft);
+  font-size: 0.76rem;
+  color: var(--lj-accent);
   background: transparent;
-  border: 1px solid var(--lj-rule);
-  border-radius: 2px;
-  padding: 0.1rem 0.45rem;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .tags a:hover {
-  color: var(--lj-accent);
-  border-color: var(--lj-accent);
+  color: var(--lj-ink);
 }
 
-/* 隐藏 PaperMod 的分享按钮与上下篇导航的博客观感 */
 .post-navigation,
 .share-buttons {
   display: none;
 }
 
 /* ============================================================================
-   十一、蝗客学社随笔页
+   十、随笔页
    ========================================================================== */
 
-/* 栏目眉：读者靠这一行判断「这篇不配发指数」 */
 .lj-essay__rubric {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.3rem 1rem;
-  padding: 0.6rem 0;
-  border-top: 2px solid var(--lj-rule-strong);
-  border-bottom: 1px solid var(--lj-rule);
-  font-family: var(--lj-serif);
-  font-size: 0.74rem;
+  gap: 0.2rem 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid var(--lj-rule-strong);
+  font-size: 0.76rem;
 }
 
 .lj-essay__rubric-name {
-  letter-spacing: 0.2em;
-  text-indent: 0.2em;
-  color: var(--lj-accent);
+  color: var(--lj-ink);
+  font-weight: 700;
 }
 
 .lj-essay__rubric-note {
-  letter-spacing: 0.08em;
   color: var(--lj-ink-faint);
 }
 
 .lj-essay__head {
-  padding: 1.5rem 0 1rem;
-  text-align: center;
+  padding: 1.1rem 0 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--lj-rule);
+  margin-bottom: 1.2rem;
 }
 
 .lj-essay__title {
-  font-family: var(--lj-serif);
-  font-size: clamp(1.4rem, 3.6vw, 1.95rem);
-  font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0.03em;
-  margin: 0 0 0.7rem;
+  font-family: var(--lj-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 0.4rem;
   color: var(--lj-ink);
 }
 
 .lj-essay__byline {
   margin: 0;
-  font-family: var(--lj-serif);
   font-size: 0.78rem;
-  letter-spacing: 0.12em;
   color: var(--lj-ink-faint);
 }
 
-/* 题记：随笔的 description 当引题用，不做摘要框 */
+/* 题记：左侧细线 + 缩进，无底色 */
 .lj-essay__epigraph {
-  margin: 0 0 2rem;
-  padding: 0.7rem 1.1rem;
-  border-left: 2px solid var(--lj-accent);
-  background: #fafaf9;
+  margin: 0 0 1.5rem;
+  padding: 0.2rem 0 0.2rem 1rem;
+  border-left: 2px solid var(--lj-rule-strong);
+  background: transparent;
   font-family: var(--lj-serif);
-  font-size: 0.9rem;
-  line-height: 1.85;
+  font-size: 0.92rem;
+  line-height: 1.75;
   color: var(--lj-ink-soft);
 }
 
 .lj-essay__body {
-  font-size: 1.04rem;
-  line-height: 1.95;
+  font-size: 1rem;
+  line-height: 1.85;
 }
 
 /* 篇末版权条 */
 .lj-essay__colophon {
-  margin-top: 3rem;
-  padding: 0.7rem 0;
+  margin-top: 2.4rem;
+  padding: 0.6rem 0;
   border-top: 1px solid var(--lj-rule);
-  border-bottom: 2px double var(--lj-rule-strong);
   display: flex;
   align-items: baseline;
   gap: 0.9rem;
-  font-family: var(--lj-serif);
   font-size: 0.76rem;
   color: var(--lj-ink-faint);
 }
 
 .lj-essay__colophon-label {
   flex: 0 0 auto;
-  letter-spacing: 0.18em;
-  text-indent: 0.18em;
   color: var(--lj-ink-soft);
+  font-weight: 500;
 }
 
-/* 主题索引起目：词条 + 篇数 + 所属栏目 */
+/* 主题索引起目 */
 .lj-indexlist {
-  margin: 1.4rem 0 0;
+  margin: 1rem 0 0;
   padding: 0;
   list-style: none;
   counter-reset: lj-term;
-  font-family: var(--lj-serif);
+  font-family: var(--lj-sans);
 }
 
 .lj-indexlist__item {
@@ -893,8 +930,12 @@ article.post-content div.highlight pre.chroma > code {
   display: flex;
   align-items: baseline;
   gap: 0.8rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px dotted var(--lj-rule);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-indexlist__item:last-child {
+  border-bottom: 0;
 }
 
 .lj-indexlist__item::before {
@@ -908,21 +949,20 @@ article.post-content div.highlight pre.chroma > code {
 .lj-indexlist__term {
   flex: 0 0 auto;
   min-width: 9em;
-  font-size: 0.98rem;
-  color: var(--lj-ink);
+  font-size: 0.94rem;
+  color: var(--lj-accent);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
 }
 
 .lj-indexlist__term:hover {
-  color: var(--lj-accent);
-  border-bottom-color: var(--lj-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .lj-indexlist__count {
   flex: 0 0 auto;
   font-size: 0.78rem;
-  color: var(--lj-accent);
+  color: var(--lj-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -934,24 +974,23 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 .lj-doc__empty {
-  margin: 2rem 0;
-  padding: 1.4rem 0;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
   border-top: 1px solid var(--lj-rule);
   border-bottom: 1px solid var(--lj-rule);
-  text-align: center;
-  font-family: var(--lj-serif);
-  font-size: 0.88rem;
-  letter-spacing: 0.1em;
+  text-align: left;
+  font-size: 0.86rem;
   color: var(--lj-ink-faint);
 }
 
-/* 随笔条目：比正式条目轻一档，不配指数徽标 */
+/* 随笔条目：比正式条目轻一档 */
 .lj-toc--plain .lj-toc__item {
   padding: 0.5rem 0;
 }
 
-.lj-toc--plain .lj-toc__title a {
-  font-size: 0.98rem;
+.lj-toc--plain .lj-toc__title {
+  font-size: 0.96rem;
+  font-weight: 500;
 }
 
 .lj-toc--plain .lj-toc__byline {
@@ -959,77 +998,71 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 /* ============================================================================
-   十二、刊务公告页 / 归档页
+   十一、刊务公告页 / 归档页
    ========================================================================== */
 
-/* 刊号戳：真实期刊封面角上的那一小块 */
+/* 刊号戳：去掉边框框，改为普通灰色行内文字 */
 .lj-docstamp {
   display: flex;
   align-items: baseline;
-  justify-content: center;
-  gap: 1rem;
+  gap: 0.8rem;
   padding: 0.9rem 0 0;
-  font-family: var(--lj-serif);
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  color: var(--lj-ink-soft);
+  font-size: 0.74rem;
+  color: var(--lj-ink-faint);
 }
 
 .lj-docstamp__no {
-  color: var(--lj-accent);
-  border: 1px solid currentColor;
-  padding: 0.15rem 0.6rem;
-  line-height: 1.6;
+  color: var(--lj-ink);
+  font-weight: 700;
+  border: 0;
+  padding: 0;
+  line-height: 1.5;
 }
 
 .lj-docstamp__kind {
   color: var(--lj-ink-faint);
 }
 
-/* 公告页的刊名比首页略小一号，避免抢正文 */
 .lj-masthead--compact {
-  padding-top: 1.1rem;
-  padding-bottom: 0.9rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 
 .lj-masthead--compact .lj-masthead__name {
-  font-size: clamp(1.5rem, 4.2vw, 2.3rem);
-  letter-spacing: 0.16em;
-  text-indent: 0.16em;
+  font-size: 1.45rem;
 }
 
 .lj-masthead--compact .lj-masthead__subtitle {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-/* 目次：卷首「本卷目次」的对应物 */
+/* 目次：行内锚点列表 */
 .lj-docnav {
   display: flex;
   align-items: baseline;
-  gap: 1.2rem;
-  margin: 1.6rem 0 1.8rem;
-  padding: 0.7rem 0;
+  gap: 1rem;
+  margin: 1.2rem 0 1.4rem;
+  padding: 0.6rem 0;
   border-top: 1px solid var(--lj-rule);
   border-bottom: 1px solid var(--lj-rule);
-  font-family: var(--lj-serif);
+  font-family: var(--lj-sans);
 }
 
 .lj-docnav__label {
   flex: 0 0 auto;
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
-  text-indent: 0.2em;
-  color: var(--lj-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--lj-ink);
 }
 
 .lj-docnav__list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.3rem;
+  gap: 0.25rem 1.1rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: var(--lj-ink-soft);
   counter-reset: lj-toc;
 }
@@ -1038,28 +1071,27 @@ article.post-content div.highlight pre.chroma > code {
   counter-increment: lj-toc;
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .lj-docnav__list li::before {
   content: counter(lj-toc) ".";
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--lj-ink-faint);
   font-variant-numeric: tabular-nums;
 }
 
 .lj-docnav__list a {
-  color: var(--lj-ink-soft);
+  color: var(--lj-accent);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
 }
 
 .lj-docnav__list a:hover {
-  color: var(--lj-accent);
-  border-bottom-color: var(--lj-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-/* 条文正文：条款号由 CSS counter 自动生成，Markdown 里不写死数字 */
+/* 条文正文：条款号由 CSS counter 自动生成 */
 .lj-doc__body {
   counter-reset: lj-clause;
 }
@@ -1068,68 +1100,59 @@ article.post-content div.highlight pre.chroma > code {
   counter-increment: lj-clause;
   counter-reset: lj-sub;
   position: relative;
-  padding-left: 2.4em;
-  font-size: 1.22rem;
-  letter-spacing: 0.04em;
-  margin-top: 2.4rem;
+  padding-left: 0;
+  font-size: 1.12rem;
+  margin-top: 2rem;
 }
 
 .lj-doc__body > h2::before {
-  content: "第 " counter(lj-clause) " 条";
-  position: absolute;
-  left: 0;
-  top: 0.2em;
-  font-family: var(--lj-serif);
-  font-size: 0.7rem;
+  content: none;
+}
+
+.lj-doc__body > h2 .lj-clause-no,
+.lj-doc__body > h3 .lj-clause-no {
+  color: var(--lj-ink-faint);
   font-weight: 400;
-  letter-spacing: 0.1em;
-  color: var(--lj-accent);
-  white-space: nowrap;
+  font-size: 0.82em;
+  margin-right: 0.5em;
+  font-variant-numeric: tabular-nums;
 }
 
 .lj-doc__body > h3 {
   counter-increment: lj-sub;
   position: relative;
-  padding-left: 2.2em;
+  padding-left: 0;
 }
 
 .lj-doc__body > h3::before {
-  content: counter(lj-clause) "." counter(lj-sub) "　";
-  position: absolute;
-  left: 0;
-  color: var(--lj-ink-faint);
-  font-size: 0.82em;
-  font-weight: 400;
+  content: none;
 }
 
 /* 版权尾栏 */
 .lj-doc__colophon {
-  margin-top: 3rem;
-  padding: 0.7rem 0;
+  margin-top: 2.4rem;
+  padding: 0.6rem 0;
   border-top: 1px solid var(--lj-rule);
-  border-bottom: 2px double var(--lj-rule-strong);
   display: flex;
   align-items: baseline;
   gap: 0.9rem;
-  font-family: var(--lj-serif);
   font-size: 0.76rem;
   color: var(--lj-ink-faint);
 }
 
 .lj-doc__colophon-label {
   flex: 0 0 auto;
-  letter-spacing: 0.18em;
-  text-indent: 0.18em;
   color: var(--lj-ink-soft);
+  font-weight: 500;
 }
 
 /* 逐卷归档块 */
 .lj-volumes {
-  margin-top: 1.4rem;
+  margin-top: 1.2rem;
 }
 
 .lj-volume + .lj-volume {
-  margin-top: 2.6rem;
+  margin-top: 2rem;
 }
 
 .lj-volume__head {
@@ -1137,37 +1160,36 @@ article.post-content div.highlight pre.chroma > code {
   align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-  padding-bottom: 0.45rem;
+  gap: 0.3rem 1rem;
+  padding-bottom: 0.35rem;
   border-bottom: 2px solid var(--lj-rule-strong);
 }
 
 .lj-volume__title {
-  font-size: 1.1rem;
-  font-weight: 400;
-  letter-spacing: 0.12em;
+  font-family: var(--lj-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
   margin: 0;
+  color: var(--lj-ink);
 }
 
 .lj-volume__meta {
   margin: 0;
-  font-family: var(--lj-serif);
   font-size: 0.76rem;
-  letter-spacing: 0.08em;
   color: var(--lj-ink-faint);
   display: flex;
   align-items: baseline;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .lj-volume__meta a {
-  color: var(--lj-ink-soft);
-  border-bottom: 1px solid var(--lj-rule);
+  color: var(--lj-accent);
+  text-decoration: none;
 }
 
 .lj-volume__meta a:hover {
-  color: var(--lj-accent);
-  border-bottom-color: var(--lj-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .lj-volume__sep {
@@ -1175,18 +1197,15 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 .lj-toc--archive .lj-toc__item {
-  padding: 0.6rem 0;
+  padding: 0.5rem 0;
 }
 
 .lj-toc--archive .lj-toc__index {
-  min-width: 4.4em;
   font-variant-numeric: tabular-nums;
 }
 
 /* ============================================================================
-   十四、页脚投稿栏
-   期刊页脚的投稿入口：与版权行之间用细栏线分隔，
-   「投　稿」二字用刊训体（宽字距），链接用赭石色。
+   十二、页脚投稿栏
    ========================================================================== */
 
 .lj-submit {
@@ -1194,33 +1213,28 @@ article.post-content div.highlight pre.chroma > code {
   align-items: baseline;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.3rem 0.9rem;
-  margin: 0 auto 0.7rem;
-  padding-bottom: 0.7rem;
+  gap: 0.2rem 0.8rem;
+  margin: 0 auto 0.6rem;
+  padding-bottom: 0.6rem;
   border-bottom: 1px solid var(--lj-rule);
-  font-family: var(--lj-serif);
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
+  font-family: var(--lj-sans);
+  font-size: 0.78rem;
 }
 
 .lj-submit__label {
   color: var(--lj-ink-faint);
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
 }
 
 .lj-submit__link {
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--lj-accent);
   text-decoration: none;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 1px;
 }
 
 .lj-submit__link:hover {
-  color: var(--lj-ink);
-  border-bottom-color: var(--lj-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .lj-submit__note {
@@ -1229,53 +1243,30 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 /* ============================================================================
-   十五、窄屏适配
+   十三、窄屏适配
    ========================================================================== */
 
 @media (max-width: 760px) {
   .lj-masthead {
-    padding-top: 1.5rem;
+    padding-top: 1.1rem;
   }
 
   .lj-masthead__name {
-    letter-spacing: 0.1em;
-    text-indent: 0.1em;
-  }
-
-  .lj-masthead__subtitle {
-    letter-spacing: 0.24em;
-    text-indent: 0.24em;
+    font-size: 1.4rem;
   }
 
   .lj-imprint {
-    font-size: 0.7rem;
-    padding: 0.5rem 0;
+    font-size: 0.74rem;
+    padding: 0.4rem 0;
   }
 
-  .lj-imprint__item {
-    padding: 0 0.6rem;
-  }
-
-  .lj-toc__item {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .lj-toc__meta {
-    text-align: left;
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-  }
-
-  .lj-index__label {
-    display: inline;
-    margin: 0 0.3rem 0 0;
+  .lj-toc__title {
+    font-size: 1rem;
   }
 
   .post-content {
-    font-size: 1rem;
-    line-height: 1.9;
+    font-size: 0.98rem;
+    line-height: 1.8;
     text-align: left;
   }
 
@@ -1283,7 +1274,6 @@ article.post-content div.highlight pre.chroma > code {
     text-indent: 0;
   }
 
-  /* 窄屏表格包一层横向滚动，避免撑破布局 */
   .post-content table {
     display: block;
     width: 100%;
@@ -1298,11 +1288,10 @@ article.post-content div.highlight pre.chroma > code {
     width: 100%;
   }
 
-  /* 窄屏导航独占一行 + 可横向滚动 + 右缘渐隐提示 */
   .header-nav {
     padding: 0 12px;
     column-gap: 12px;
-    line-height: 46px;
+    line-height: 44px;
   }
 
   .menu {
@@ -1330,75 +1319,39 @@ article.post-content div.highlight pre.chroma > code {
   }
 
   .menu a {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
   }
 
-  /* 刊号戳：窄屏折成两行居中，不横向溢出 */
   .lj-docstamp {
     flex-wrap: wrap;
-    gap: 0.4rem 0.8rem;
-    letter-spacing: 0.16em;
+    gap: 0.3rem 0.7rem;
   }
 
-  /* 目次：标签独立一行，条目自然折行 */
   .lj-docnav {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .lj-docnav__list {
-    gap: 0.3rem 1rem;
+    gap: 0.2rem 0.9rem;
   }
 
-  /* 条款号在窄屏太占位，改为题名下方的小注 */
-  .lj-doc__body > h2 {
-    padding-left: 0;
-    margin-top: 2rem;
-  }
-
-  .lj-doc__body > h2::before {
-    position: static;
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.68rem;
-  }
-
-  .lj-doc__body > h3 {
-    padding-left: 0;
-  }
-
-  .lj-doc__body > h3::before {
-    position: static;
-  }
-
-  .lj-doc__colophon {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
-  /* 随笔：栏目眉折行，版权条折行 */
-  .lj-essay__rubric {
+  .lj-doc__colophon,
+  .lj-essay__rubric,
+  .lj-essay__colophon {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.2rem;
   }
 
-  .lj-essay__colophon {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
   .lj-essay__body {
-    font-size: 1rem;
+    font-size: 0.98rem;
   }
 
-  /* 主题索引：窄屏改成堆叠，词条名不再占固定宽度 */
   .lj-indexlist__item {
     flex-wrap: wrap;
-    gap: 0.2rem 0.6rem;
+    gap: 0.15rem 0.6rem;
   }
 
   .lj-indexlist__term {
@@ -1411,22 +1364,14 @@ article.post-content div.highlight pre.chroma > code {
     padding-left: 2.4em;
   }
 
-  /* 投稿栏窄屏折行居中 */
   .lj-submit {
-    gap: 0.25rem 0.7rem;
-    font-size: 0.76rem;
-  }
-}
-
-/* 平板：两栏要目 */
-@media (min-width: 761px) and (max-width: 1000px) {
-  .lj-toc {
-    column-count: 1;
+    gap: 0.2rem 0.6rem;
+    font-size: 0.74rem;
   }
 }
 
 /* ============================================================================
-   十一、打印：还原为传统期刊纸样
+   十四、打印
    ========================================================================== */
 
 @media print {
@@ -1445,7 +1390,7 @@ article.post-content div.highlight pre.chroma > code {
   }
 
   .lj-masthead__name {
-    font-size: 24pt;
+    font-size: 20pt;
   }
 
   .post-content {

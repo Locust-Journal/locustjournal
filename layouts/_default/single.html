@@ -21,9 +21,7 @@
     <h1 class="lj-article-head__title">{{ .Title }}</h1>
 
     {{- with .Params.titleEn }}
-      <p style="font-size:.86rem;color:var(--lj-ink-soft);font-style:italic;margin:0 0 .9rem;line-height:1.6;text-align:center">
-        {{ . }}
-      </p>
+      <p class="lj-article-head__titleEn">{{ . }}</p>
     {{- end }}
 
     <p class="lj-article-head__authors">

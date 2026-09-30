@@ -211,6 +211,12 @@ def build_pdf(md_path, out_path, reg_font, bold_font):
     locust_index = meta.get("locust_index", "")
     date = meta.get("date", "")
     vol = meta.get("vol", "")
+    affiliation = meta.get("affiliation", "")
+    # 摘要与关键词：与网页版（layouts/_default/single.html）保持一致。
+    # 早前 PDF 只排正文，缺摘要与关键词，导致同一篇稿件的 PDF 与网页内容
+    # 不一致 —— 已修。
+    description = meta.get("description", "")
+    tags = meta.get("tags", "").strip("[]\"'")
 
     doc = BaseDocTemplate(
         out_path, pagesize=A4,
@@ -243,6 +249,14 @@ def build_pdf(md_path, out_path, reg_font, bold_font):
     s_cellb = ParagraphStyle("cb", fontName=bold_font, fontSize=8.5, leading=13, textColor=INK)
     s_footnote = ParagraphStyle("fn", fontName=reg_font, fontSize=8.5, leading=14,
                                 textColor=MUTED, spaceBefore=8)
+    # 摘要：与网页版一致用缩进块 + 上下细线，不用底色
+    s_abs_label = ParagraphStyle("al", fontName=reg_font, fontSize=9, leading=14,
+                                 textColor=MUTED, spaceAfter=3)
+    s_abs = ParagraphStyle("ab", fontName=reg_font, fontSize=9.5, leading=16,
+                          alignment=TA_JUSTIFY, textColor=INK,
+                          leftIndent=10, rightIndent=6, spaceAfter=0)
+    s_kw = ParagraphStyle("kw", fontName=reg_font, fontSize=9, leading=14,
+                          textColor=MUTED, leftIndent=10, spaceBefore=4)
 
     story = []
 
@@ -253,13 +267,31 @@ def build_pdf(md_path, out_path, reg_font, bold_font):
         story.append(Paragraph(f"第 {vol} 卷 · 内测号", s_meta))
     if authors:
         story.append(Paragraph(inline_markup(authors), s_meta))
+    if affiliation:
+        story.append(Paragraph(inline_markup(affiliation), s_meta))
     if locust_index:
         story.append(Paragraph(f"蝗掠指数（Locust Index）{locust_index} / 10", s_meta))
     if date:
         story.append(Paragraph(date, s_meta))
     story.append(Spacer(1, 8))
-    story.append(HRFlowable(width="100%", thickness=0.8, color=RULE))
+    story.append(HRFlowable(width="100%", thickness=1.2, color=INK))
     story.append(Spacer(1, 10))
+
+    # 摘要 + 关键词（与网页版篇首结构一致：摘要 → 关键词 → 正文）
+    if description:
+        story.append(Paragraph("摘　要", s_abs_label))
+        story.append(Paragraph(inline_markup(description), s_abs))
+        story.append(Spacer(1, 6))
+    if tags:
+        # front matter 的 tags 是 YAML 行内数组，朴素解析后仍带 [" "] 与引号
+        kw = tags.replace("]", "").replace("[", "").replace('"', "").replace("'", "")
+        kw = kw.replace(",", "；").replace("、", "；").strip("； ")
+        if kw:
+            story.append(Paragraph(f"关键词　{kw}", s_kw))
+    if description or tags:
+        story.append(Spacer(1, 4))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=RULE))
+        story.append(Spacer(1, 10))
 
     # 正文
     for kind, payload in blocks:

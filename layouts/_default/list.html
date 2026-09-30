@@ -28,12 +28,11 @@
 
 <article class="lj-home">
 
-  {{/* ---------- 刊头 ---------- */}}
+  {{/* ---------- 刊头：左对齐单行 ---------- */}}
   <header class="lj-masthead">
-    <h1 class="lj-masthead__name">{{ .Title }}</h1>
-    <p class="lj-masthead__subtitle">
-      {{- if $isTerm }}词　条{{ else }}{{ .Params.subtitle | default "目　录" }}{{ end }}
-    </p>
+    <h1 class="lj-masthead__name">
+      {{ .Title }}{{ with .Params.cnname }} <span class="lj-masthead__cn">{{ . }}</span>{{ end }}
+    </h1>
     <p class="lj-masthead__motto">
       <span lang="en">Speeches fade, snacks remain.</span>
       <span>报告转瞬即逝，茶歇亘古长存</span>
@@ -60,27 +59,29 @@
   {{/* ---------- 正式条目（蝗札）---------- */}}
   {{- if $arts }}
   <h2 class="lj-section-head">
-    {{ if $isTerm }}正　文{{ else }}本 卷 目 录{{ end }}
+    {{ if $isTerm }}词条篇目{{ else }}本卷目录{{ end }}
   </h2>
   <ul class="lj-toc">
     {{- range $arts }}
       <li class="lj-toc__item">
         <div class="lj-toc__main">
           <span class="lj-toc__index">蝗札 {{ .Params.seq | default "—" }}</span>
-          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
           <span class="lj-toc__byline">
             {{- with .Params.authors }}{{ delimit . "、" }}{{ end }}
             {{- with .Params.affiliation }}　{{ . }}{{ end }}
-            {{- with .Params.tags }}　{{ delimit . "、" }}{{ end }}
           </span>
+          {{- with .Params.tags }}
+            <span class="lj-toc__byline">主题：{{ delimit . "、" }}</span>
+          {{- end }}
           {{- with .Params.pdf }}
-            <a class="lj-toc__pdf" href="{{ . }}">PDF ↓</a>
+            <a class="lj-toc__pdf" href="{{ . }}">PDF</a>
           {{- end }}
         </div>
         <div class="lj-toc__meta">
           <span class="lj-index__label">蝗掠指数</span>
           <span class="lj-index">{{ .Params.locust_index | default "—" }}</span>
-          <span class="lj-folio">第 1 卷 · p.{{ .Params.page | default "—" }}</span>
+          <span class="lj-folio">p.{{ .Params.page | default "—" }}</span>
         </div>
       </li>
     {{- end }}
@@ -90,16 +91,16 @@
   {{/* ---------- 随笔条目 ----------
        随笔不配发指数、不属正式刊载，视觉上轻一档，另起一节。 */}}
   {{- if $essays }}
-  <h2 class="lj-section-head">学 社 随 笔</h2>
+  <h2 class="lj-section-head">学社随笔</h2>
   <ul class="lj-toc lj-toc--plain">
     {{- range (sort $essays "Date" "desc") }}
       <li class="lj-toc__item">
         <div class="lj-toc__main">
-          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
           {{- with (.Params.summary | default .Description) }}<span class="lj-toc__byline">{{ . }}</span>{{ end }}
         </div>
         <div class="lj-toc__meta">
-          <span class="lj-folio">不配发指数</span>
+          <span class="lj-folio">{{ .Date.Format "2006-01-02" }}　不配发指数</span>
         </div>
       </li>
     {{- end }}

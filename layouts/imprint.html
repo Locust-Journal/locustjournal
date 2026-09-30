@@ -9,16 +9,15 @@
 {{- define "main" }}
 <article class="lj-doc">
 
-  {{/* ---------- 刊号戳 ---------- */}}
+  {{/* ---------- 刊号戳（行内文字，非徽章） ---------- */}}
   <div class="lj-docstamp">
     <span class="lj-docstamp__no">{{ .Params.docno | default "刊务公告" }}</span>
     <span class="lj-docstamp__kind">LOCUST JOURNAL</span>
   </div>
 
-  {{/* ---------- 刊名 ---------- */}}
+  {{/* ---------- 刊名：西文 + 中文同行 ---------- */}}
   <header class="lj-masthead lj-masthead--compact">
-    <h1 class="lj-masthead__name">{{ .Params.doctitle | default .Title }}</h1>
-    <p class="lj-masthead__subtitle">{{ .Title }}</p>
+    <h1 class="lj-masthead__name">{{ .Params.doctitle | default .Title }} <span class="lj-masthead__cn">{{ .Title }}</span></h1>
   </header>
 
   <div class="lj-imprint">

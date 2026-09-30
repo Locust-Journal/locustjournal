@@ -5,16 +5,15 @@
 {{- define "main" }}
 <article class="lj-doc">
 
-  {{/* ---------- 刊号戳 ---------- */}}
+  {{/* ---------- 刊号戳（行内文字，非徽章） ---------- */}}
   <div class="lj-docstamp">
-    <span class="lj-docstamp__no">总　目　次</span>
+    <span class="lj-docstamp__no">总目次</span>
     <span class="lj-docstamp__kind">ARCHIVE</span>
   </div>
 
-  {{/* ---------- 刊名 ---------- */}}
+  {{/* ---------- 刊名：西文 + 中文同行 ---------- */}}
   <header class="lj-masthead lj-masthead--compact">
-    <h1 class="lj-masthead__name">LOCUST JOURNAL</h1>
-    <p class="lj-masthead__subtitle">总归档</p>
+    <h1 class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">总归档</span></h1>
   </header>
 
   <div class="lj-imprint">
@@ -53,7 +52,7 @@
           <li class="lj-toc__item">
             <div class="lj-toc__main">
               <span class="lj-toc__index">p.{{ .Params.page | default "—" }}</span>
-              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
               <span class="lj-toc__byline">{{ with .Params.authors }}{{ delimit . "、" }}{{ end }}</span>
             </div>
             <div class="lj-toc__meta">
@@ -66,7 +65,7 @@
           <li class="lj-toc__item">
             <div class="lj-toc__main">
               <span class="lj-toc__index">—</span>
-              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
             </div>
             <div class="lj-toc__meta">
               <span class="lj-index__label">蝗掠指数</span>
@@ -95,7 +94,7 @@
           <li class="lj-toc__item">
             <div class="lj-toc__main">
               <span class="lj-toc__index">{{ .Date.Format "2006-01-02" }}</span>
-              <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
               <span class="lj-toc__byline">{{ with .Params.tags }}{{ delimit . "、" }}{{ end }}</span>
             </div>
           </li>

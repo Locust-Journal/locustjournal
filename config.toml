@@ -41,8 +41,15 @@ mainSections = ["articles"]
       hideIcon = false
   [params.editURL]
     enable = false
-  [params.assets]
-    favicon = "images/favicon.png"
+  # 图标：PaperMod 默认按站点根路径查找 favicon.png / favicon-16x16.png /
+  # favicon-32x32.png / apple-touch-icon.png / safari-pinned-tab.svg，
+  # 所以这些文件必须直接放在 static/ 根（产物才落在站点根路径）。
+  # 早前把它们放在 static/assets/images/ 并在 [params.assets] 下把 favicon
+  # 覆盖为 "images/favicon.png"，结果产物落在 /assets/images/ 而引用指向
+  # /images/，线上图标全部 404，build.sh 也会因校验不到图标而失败。
+  # 不要在 [params.assets] 下写 favicon 覆盖。
+  # 期刊排版样式走 assets/css/extended/（PaperMod 用 resources.Match 自动收录），
+  # 不需要也不能在这里配 customCSS —— 该主题版本不支持该参数。
   # 期刊排版样式走 assets/css/extended/（PaperMod 用 resources.Match 自动收录），
   # 不需要也不能在这里配 customCSS —— 该主题版本不支持该参数。
 

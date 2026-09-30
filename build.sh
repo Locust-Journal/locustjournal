@@ -126,7 +126,15 @@ required_files=(
   "public/archive/index.html"
   "public/assets/pdf/vol1/article01.pdf"
   "public/assets/pdf/vol1/article02.pdf"
-  "public/assets/images/favicon.png"
+  # 图标在站点根（static/ 根 → 产物根路径），与 PaperMod 的引用约定一致。
+  # 早前图标放在 static/assets/images/ 而 HTML 引用 /images/，线上图标全 404，
+  # 校验路径也写错了 —— 现在以「HTML 引用」为准校验产物。
+  "public/favicon.png"
+  "public/favicon-16x16.png"
+  "public/favicon-32x32.png"
+  "public/favicon.ico"
+  "public/apple-touch-icon.png"
+  "public/safari-pinned-tab.svg"
 )
 
 missing=0
@@ -155,6 +163,35 @@ if [[ "${missing}" -ne 0 ]]; then
   echo "构建产物不完整，终止部署。" >&2
   exit 1
 fi
+
+#------------------------------------------------------------------------------
+# 图标引用闭环检查
+#
+# 只校验「文件存在」是不够的：本项目曾出现图标放在 static/assets/images/、
+# 而 HTML 引用 /images/favicon.png 的错位 —— 文件都在，校验能过，
+# 但线上每个页面的图标全是 404。
+#
+# 这里反向解析首页里真实引用的图标 URL，确认它在 public/ 下确实存在。
+#------------------------------------------------------------------------------
+echo "==> 校验图标引用闭环"
+icon_broken=0
+while IFS= read -r icon_url; do
+  # https://locustjournal.com/favicon.ico → public/favicon.ico
+  rel_path="${icon_url#https://locustjournal.com/}"
+  rel_path="${rel_path%%\?*}"
+  [[ -z "${rel_path}" ]] && continue
+  if [[ ! -f "public/${rel_path}" ]]; then
+    echo "    图标引用指向不存在的产物：${rel_path}" >&2
+    icon_broken=1
+  fi
+done < <(grep -oE 'rel=(icon|apple-touch-icon|mask-icon)[^>]*href=https://locustjournal\.com/[^ >]*' \
+         public/index.html | grep -oE 'href=https://[^ >]*' | cut -d= -f2- | sort -u)
+
+if [[ "${icon_broken}" -ne 0 ]]; then
+  echo "图标引用与产物不一致，终止部署。" >&2
+  exit 1
+fi
+echo "    图标引用全部命中产物"
 
 # 404 页必须存在，否则 not_found_handling: "404-page" 无页可返回
 if [[ ! -f "public/404.html" ]]; then

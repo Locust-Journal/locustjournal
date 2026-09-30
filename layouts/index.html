@@ -1,22 +1,22 @@
-{{- /* LOCUST Journal 首页 —— 期刊形态
-     刊头 masthead → 卷期要目 → 栏目说明 → 编务信息 → 免责声明
-     刻意不显示 PaperMod 的博客卡片流：期刊首页是「封面 + 目录」，不是文章列表。 */ -}}
+{{- /* LOCUST Journal 首页 —— 学术索引式版面
+     排版基准：arXiv / JSTOR / bioRxiv 实测的目录页形态。
+       左对齐刊头 + 单线分隔 + 连续条目 + 缩进分层，无居中装饰、无徽章。
+     刻意不显示 PaperMod 的博客卡片流：期刊首页是「卷期目录页」，不是文章列表。 */ -}}
 
 
 {{- define "main" }}
 <article class="lj-home">
 
-  {{/* ---------- 刊头 ---------- */}}
+  {{/* ---------- 刊头：左对齐单行，下方主线分隔 ---------- */}}
   <header class="lj-masthead">
-    <h1 class="lj-masthead__name">LOCUST JOURNAL</h1>
-    <p class="lj-masthead__subtitle">学术蝗虫</p>
+    <h1 class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></h1>
     <p class="lj-masthead__motto">
       <span lang="en">Speeches fade, snacks remain.</span>
       <span>报告转瞬即逝，茶歇亘古长存</span>
     </p>
   </header>
 
-  {{/* ---------- 刊头元信息行 ---------- */}}
+  {{/* ---------- 刊头元信息行：卷期 / 刊号 / 编辑部 ---------- */}}
   <div class="lj-imprint">
     <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
     <span class="lj-imprint__item"><span class="lj-imprint__label">刊期</span>2026 年 9 月</span>
@@ -29,8 +29,10 @@
     <b>重要提示</b>　本刊为<b>纯娱乐性质的模拟学术刊物</b>，不属于正式出版物，所刊载内容不具备任何学术效力，不可用于毕业、评奖、职称认定与项目申报。本刊永久免费，不收取任何版面费、审稿费与处理费。
   </div>
 
-  {{/* ---------- 本卷要目 ---------- */}}
-  <h2 class="lj-section-head">本卷要目 · Contents</h2>
+  {{/* ---------- 本卷要目 ----------
+     条目结构与 arXiv 一致：篇次 + 标题 + 作者单位行 + 指数/页码行。
+     不再把指数做成边框徽章，也不再让 meta 独占右侧一列。 */}}
+  <h2 class="lj-section-head">本卷要目</h2>
 
   {{/* 按 seq 字段排序（"01" < "02"）。不用 ByWeight —— 两篇都没有 weight，
        ByWeight 会退化成不确定顺序，曾导致 8.3 排在 7.8 前面。 */}}
@@ -42,7 +44,7 @@
       <li class="lj-toc__item">
         <div class="lj-toc__main">
           <span class="lj-toc__index">蝗札 {{ .Params.seq | default "—" }}</span>
-          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
           <span class="lj-toc__byline">
             {{- with .Params.authors }}{{ delimit . "、" }}{{ end }}
             {{- with .Params.affiliation }}　{{ . }}{{ end }}
@@ -57,16 +59,16 @@
     {{- end }}
   </ul>
 
-  {{/* ---------- 学社随笔另列 ---------- 
+  {{/* ---------- 学社随笔另列 ----------
        随笔不配发蝗掠指数、不属于本卷正式刊载内容，
        混进「本卷要目」会让读者误以为它与蝗札同级。 */}}
-  <h2 class="lj-section-head">学社随笔 · Scholar Essays</h2>
+  <h2 class="lj-section-head">学社随笔</h2>
 
   <ul class="lj-toc lj-toc--plain">
     {{- range (where site.RegularPages "Section" "scholar").ByDate }}
       <li class="lj-toc__item">
         <div class="lj-toc__main">
-          <a class="lj-toc__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
           {{- with .Params.summary }}<span class="lj-toc__byline">{{ . }}</span>{{ end }}
         </div>
         <div class="lj-toc__meta">
@@ -77,7 +79,7 @@
   </ul>
 
   {{/* ---------- 刊名缘起 ---------- */}}
-  <h2 class="lj-section-head">刊名缘起 · About the Title</h2>
+  <h2 class="lj-section-head">刊名缘起</h2>
 
   <div class="post-content">
     <p>「学术蝗虫」，科研圈通识之梗：专指奔赴各类学术会议，不专注报告交流，惟以扫荡茶歇点心为要务的参会群体。后引申喻指批量产出、缺乏实质贡献的灌水研究与冗余文稿。</p>
@@ -85,7 +87,7 @@
   </div>
 
   {{/* ---------- 栏目设置 ---------- */}}
-  <h2 class="lj-section-head">栏目设置 · Sections</h2>
+  <h2 class="lj-section-head">栏目设置</h2>
 
   <div class="post-content">
     <h3>蝗札 · Articles</h3>
@@ -94,13 +96,18 @@
     <p>随笔栏目，收录会议观测手记、科研日常吐槽、实验心路复盘。仅做合规性审核，不经过完整双盲评审，不纳入正式蝗札序列。</p>
   </div>
 
-  <hr class="lj-rule lj-rule--double">
+  <hr class="lj-rule">
 
   {{/* ---------- 编务 ---------- */}}
   <div class="post-content">
     <h3>办刊原则</h3>
     <p>小圈子存续，不盲目出圈；趣味性优先，不追求意义；纯非盈利运营，不沾染商业。</p>
-    <p><a href="/about/">发刊宗旨与编务体系</a>　·　<a href="/guide/">投稿须知</a>　·　<a href="/board/">编委会</a>　·　<a href="/archive/">总归档</a></p>
+    <p class="lj-home__links">
+      <a href="/about/">发刊宗旨与编务体系</a>
+      <a href="/guide/">投稿须知</a>
+      <a href="/board/">编委会</a>
+      <a href="/archive/">总归档</a>
+    </p>
   </div>
 
 {{- end }}

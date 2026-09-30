@@ -1,56 +1,72 @@
 /* ============================================================================
-   LOCUST Journal《学术蝗虫》— 学术索引式排版系统
+   LOCUST Journal《学术蝗虫》— 国际权威期刊式排版系统
    ----------------------------------------------------------------------------
-   排版基准来自对真实学术站点的实测探针（arXiv / JSTOR / bioRxiv / DOAJ），
-   而非凭感觉的"期刊感"。实测结论：
+   排版基准来自对真实学术期刊站的实测探针，而非预印本服务器。
 
-     arXiv  list/cs.AI/recent
-       body            #fff 底 / #000 正文 / 16px
-       letter-spacing  normal（标题、作者、分类全部 normal）
-       text-transform  none
+   ⚠️ 上一版基准选错了：拿 arXiv（预印本服务器）当参照，
+      结果做出来是「预印本列表页」而非「期刊」观感。
+
+   本轮实测基准：
+     IEEE Spectrum（spectrum.ieee.org）
+       body            serif 衬线 / 18px / line-height 29.88px（1.66）
+       h1 刊名          18px / **400 细体** / letter-spacing normal / serif
+       文章标题        18px / 400 / normal / text-align start
        hr / 边框装饰   0 处
-       层级            靠缩进：dd margin-left 40px
-       字号阶梯        18px/700 标题 → 14.3px 作者 → 11.7px 分类
-       强调色          只有链接蓝，数字不带状态色
+       栏宽            1280px 全宽，不收窄
 
-   期刊制度感来自信息密度、缩进分层、克制配色，
-   不来自居中大字、字距、边框和徽章。本文件按此重写。
+     ACM TOCS（dl.acm.org）
+       body            system-ui / 16px / line-height 1.5
+       h1              40px / 600；h2 24px / 600
+       letter-spacing  normal，text-transform none
+       链接            #0000ee 纯蓝
+
+     ScienceDirect
+       body            16px / line-height 1.5 / #1f1f1f
+       h1 刊名          32px / **400 细体** / normal
+
+   归纳出的期刊制度感来源（本文件按此实现）：
+     1. 正文放大到 16–18px，行高收到 1.5–1.66 —— 此前 15px/1.75 偏窄偏松
+     2. 刊名用**细体**（400）而非粗体 —— 三家实测全是细体，这是最关键的一条
+     3. 栏宽放开到接近全宽 —— 此前 460px 窄柱是「博客」特征
+     4. 层级靠缩进与留白，不靠边框与色块
+     5. 正文中文用衬线（Songti/Source Han Serif），西文用 Times/Georgia
+        —— 期刊正文是衬线体，此前全站无衬线是「网页感」的主因
 
    类名与 themes/PaperMod/ 的覆盖点全部保留，避免模板断裂。
    ========================================================================== */
 
 :root {
-  /* ---- 字体：与实测基准一致走无衬线，衬线只留给正文 ---- */
+  /* ---- 字体：正文改衬线（期刊惯例），无衬线只用于刊名与标签 ---- */
   --lj-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
     sans-serif;
-  --lj-serif: "Songti SC", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC",
-    "Times New Roman", Georgia, serif;
+  --lj-serif: "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC", "SimSun",
+    "Times New Roman", Times, Georgia, serif;
   --lj-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
   /* ---- 色板：纯白底 + 纯黑字 + 单一强调色。
      赭石降级为"警示"专用色，不再承担标题 / 链接 / 徽章的常规强调，
      避免整页被同一个色相刷满（那正是 AI 生成站点的典型观感）。 ---- */
   --lj-ink: #000;             /* 正文墨色：纯黑 */
-  --lj-ink-soft: #444;        /* 次级文字：作者、说明 */
-  --lj-ink-faint: #777;       /* 三级：页码、编号、元信息 */
+  --lj-ink-soft: #3a3a3a;     /* 次级文字：作者、说明（实测期刊用 #1f–#3a） */
+  --lj-ink-faint: #6b6b6b;    /* 三级：页码、编号、元信息 */
   --lj-paper: #fff;           /* 纸白：纯白，无暖调 */
-  --lj-rule: #d5d5d5;         /* 栏线：浅灰 */
+  --lj-rule: #d8d8d8;         /* 栏线：浅灰 */
   --lj-rule-strong: #000;     /* 主栏线 */
-  --lj-accent: #0b57a4;       /* 链接蓝：与 arXiv 一致，唯一常规强调色 */
+  --lj-accent: #0b57a4;       /* 链接蓝：唯一常规强调色 */
   --lj-warn: #8a4b00;         /* 免责 / 声明专用暖色，极少量使用 */
 
-  --theme-font-family: var(--lj-sans);
-  --content-font-size: 15px;
+  --theme-font-family: var(--lj-serif);
+  --content-font-size: 17px;
   --theme-color: var(--lj-accent);
 }
 
 body {
   background: var(--lj-paper);
   color: var(--lj-ink);
-  font-family: var(--lj-sans);
-  font-size: 15px;
-  line-height: 1.6;
+  font-family: var(--lj-serif);
+  font-size: 17px;
+  line-height: 1.62;
 }
 
 /* 全站文字默认不继承字距与大小写变换 —— 实测基准里两值均为 normal/none */
@@ -73,39 +89,85 @@ h6 {
 
 /* ============================================================================
    一、刊头 Masthead
-   真实期刊目录页的标题是左对齐、单行、可扫读的，
-   不是居中大字加字距。这里保留刊名的庄重感，但靠字号与下方细线建立权重。
+   真实期刊的刊名是**细体**、字距 normal、左对齐单行。
+   此前用 700 粗体 + 0.32em 字距，那是杂志封面做法，
+   与 IEEE(400) / ScienceDirect(400) 的实测结果相反。
    ========================================================================== */
 
 .lj-masthead {
-  padding: 1.6rem 0 0.7rem;
-  margin: 0 0 0.9rem;
+  padding: 1.1rem 0 0.5rem;
+  margin: 0 0 0.7rem;
   border-bottom: 2px solid var(--lj-rule-strong);
 }
 
+/* 刊名：细体 + 大字号。字号给足 2rem+，靠字重轻、字距 normal 建立庄重感，
+   而不是靠粗体与字距。 */
 .lj-masthead__name {
   font-family: var(--lj-sans);
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 2.05rem;
+  font-weight: 400;
+  line-height: 1.2;
   color: var(--lj-ink);
   margin: 0;
 }
 
+/* 副题：期刊 ISSN / 副标题惯例是紧贴刊名的窄体小字 */
 .lj-masthead__subtitle {
   font-family: var(--lj-sans);
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 400;
   color: var(--lj-ink-soft);
-  margin: 0.3rem 0 0;
+  margin: 0.25rem 0 0;
 }
 
 /* 刊名行的中文刊名：与西文同处一行，弱化为灰色，不另起居中副题 */
 .lj-masthead__cn {
   font-weight: 400;
-  font-size: 0.72em;
+  font-size: 0.66em;
+  color: var(--lj-ink-soft);
+  margin-left: 0.55em;
+  font-family: var(--lj-serif);
+}
+
+/* 内页刊头：刊名缩为眉题，让位给论文题名 / 栏目名。
+   辨识度靠「每页可见」实现，不靠抢视觉重心 ——
+   若内页刊名与论文标题同样大，两者会互相打架，读者反而读不出主次。 */
+.lj-masthead--inner {
+  padding: 0.9rem 0 0.45rem;
+  margin-bottom: 1.1rem;
+}
+
+.lj-masthead--inner .lj-masthead__name {
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.lj-masthead--inner .lj-masthead__motto {
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+/* 栏目名（目录 / 总归档 / 主题索引）：内页的真正主标题，衬线细体 */
+.lj-masthead__section {
+  font-family: var(--lj-serif);
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--lj-ink);
+  margin: 0.5rem 0 0;
+}
+
+.lj-masthead__section .lj-masthead__cn {
+  font-size: 0.62em;
   color: var(--lj-ink-soft);
   margin-left: 0.5em;
+}
+
+/* 兼容旧的 --compact 命名（archive/taxonomy 曾用），现在统一走 --inner */
+.lj-masthead--compact {
+  padding: 0.9rem 0 0.45rem;
+  margin-bottom: 1.1rem;
+}
 }
 
 /* 首页底部编务链接：横排文字链接，不用居中点分隔 */
@@ -127,9 +189,9 @@ h6 {
 }
 
 .lj-masthead__motto {
-  margin: 0.5rem 0 0;
-  font-family: var(--lj-sans);
-  font-size: 0.82rem;
+  margin: 0.35rem 0 0;
+  font-family: var(--lj-serif);
+  font-size: 0.88rem;
   color: var(--lj-ink-faint);
 }
 
@@ -340,68 +402,75 @@ h6 {
 }
 
 .lj-article-head__kicker {
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   color: var(--lj-ink-faint);
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
+  font-family: var(--lj-sans);
 }
 
+/* 篇首标题：学术论文标题是句首大写、正常字距、衬线或无衬线皆可，
+   但**不加字距、不用大写**。此前 700 + 无衬线是博客标题观感。 */
 .lj-article-head__title {
-  font-family: var(--lj-sans);
-  font-size: 1.65rem;
+  font-family: var(--lj-serif);
+  font-size: 1.85rem;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--lj-ink);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.45rem;
 }
 
 .lj-article-head__titleEn {
-  font-family: var(--lj-sans);
-  font-size: 0.92rem;
+  font-family: var(--lj-serif);
+  font-size: 1rem;
   font-style: italic;
   color: var(--lj-ink-soft);
-  margin: 0 0 0.7rem;
+  margin: 0 0 0.65rem;
   line-height: 1.5;
 }
 
 .lj-article-head__authors {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--lj-ink);
   margin: 0 0 0.15rem;
+  font-family: var(--lj-serif);
 }
 
 .lj-article-head__affil {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--lj-ink-faint);
   margin: 0 0 0.7rem;
+  font-family: var(--lj-sans);
 }
 
-/* 摘要：上下细线 + 左缩进，无底色 */
+/* 摘要：学术期刊摘要惯例是缩进 + 小字号 + 无边框色块。
+   此前上下各一条线 + 左侧竖条，视觉上像一个 UI 卡片。 */
 .lj-abstract {
   margin: 1rem 0 0;
-  padding: 0.8rem 0 0.8rem 1rem;
-  border-top: 1px solid var(--lj-rule);
-  border-bottom: 1px solid var(--lj-rule);
-  border-left: 2px solid var(--lj-ink-faint);
+  padding: 0.15rem 0 0.15rem 1.1rem;
+  border: 0;
+  border-left: 2px solid var(--lj-rule);
   background: transparent;
   text-align: left;
 }
 
 .lj-abstract__label {
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   color: var(--lj-ink-faint);
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
+  font-family: var(--lj-sans);
 }
 
 .lj-abstract__body {
-  font-size: 0.88rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.65;
   color: var(--lj-ink);
   margin: 0;
+  text-indent: 0;
 }
 
 .lj-keywords {
   margin: 0.8rem 0 0;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--lj-ink-soft);
   text-align: left;
 }
@@ -413,46 +482,48 @@ h6 {
 
 /* ============================================================================
    五、正文学术排版
-   正文用衬线（中文长文可读性），标题用无衬线粗体（与基准一致）。
-   保留首行缩进与两端对齐 —— 这是中文期刊正文规范，不属于 AI 感来源。
+   正文用衬线 —— 这是期刊与网页最直接的区别。实测 IEEE Spectrum 全文
+   body 即为 serif；此前全站无衬线是「网页感」的主因。
+   行高收到 1.62（实测 IEEE 1.66 / ACM 1.5 / Elsevier 1.5），此前 1.85 过松。
+   保留首行缩进与两端对齐 —— 中文期刊正文规范，不属于 AI 感来源。
    ========================================================================== */
 
 .post-content {
   font-family: var(--lj-serif);
-  font-size: 1rem;
-  line-height: 1.85;
+  font-size: 1.06rem;
+  line-height: 1.62;
   color: var(--lj-ink);
   text-align: justify;
   text-justify: inter-ideograph;
 }
 
+/* 论文内小标题也用衬线，且不加下边框 ——
+   期刊正文里的节标题是纯文字层级，不画线。 */
 .post-content h2,
 .post-content h3,
 .post-content h4,
 .post-content h5,
 .post-content h6 {
-  font-family: var(--lj-sans);
+  font-family: var(--lj-serif);
   font-weight: 700;
 }
 
 .post-content h2 {
-  font-size: 1.15rem;
+  font-size: 1.22rem;
   color: var(--lj-ink);
-  margin: 2rem 0 0.8rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid var(--lj-rule);
+  margin: 1.9rem 0 0.7rem;
 }
 
 .post-content h3 {
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   color: var(--lj-ink);
-  margin: 1.5rem 0 0.6rem;
+  margin: 1.4rem 0 0.5rem;
 }
 
 .post-content h4 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--lj-ink);
-  margin: 1.2rem 0 0.5rem;
+  margin: 1.1rem 0 0.45rem;
 }
 
 .post-content > p {
@@ -719,20 +790,30 @@ article.post-content div.highlight pre.chroma > code {
   background: var(--lj-paper);
 }
 
+/* 栏宽：PaperMod 默认 --main-width: 720px，对期刊正文偏窄。
+   实测 IEEE Spectrum / ScienceDirect 均用接近全宽的正文栏（1280px 视口下
+   内容区约 1100–1200px）。这里放到 1080px，配合 17px 字号约 60–65 字符/行，
+   落在期刊可读行长区间内。 */
+:root {
+  --main-width: 1080px;
+}
+
 .header-nav {
-  max-width: 1100px;
+  max-width: 1080px;
   line-height: 46px;
 }
 
+/* 刊名/logo：细体，与正文刊头一致。700 是博客/落地页的做法。 */
 .logo a {
   font-family: var(--lj-sans);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 400;
   color: var(--lj-ink);
 }
 
+/* 导航项：期刊目录页的导航是低调的小字，不做粗体强调 */
 .menu a {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--lj-ink-soft);
 }
 
@@ -742,7 +823,7 @@ article.post-content div.highlight pre.chroma > code {
 
 .menu .active {
   color: var(--lj-ink);
-  font-weight: 700;
+  font-weight: 400;
   text-decoration: none;
   box-shadow: inset 0 -2px 0 var(--lj-ink);
 }

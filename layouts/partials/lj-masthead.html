@@ -1,0 +1,26 @@
+{{- /* LOCUST Journal 内页刊头 —— 文章、列表、scholar 等页面共用。
+
+     为什么要抽成 partial：辨识度来自「每一页都能看到刊名与标语」。
+     早期只有首页有刊头，内页只有 PaperMod 默认的小字 logo，
+     读者一进文章就不知道自己在哪个刊物里，站点品牌在阅读路径上断了。
+
+     刊名字形（细体 400、字距 normal）依据实测：
+       IEEE Spectrum  h1 18px/400/letter-spacing normal/serif
+       ScienceDirect   h1 32px/400/letter-spacing normal
+     粗体 + 大字距是杂志封面做法，与期刊惯例相反。
+
+     标题层级：首页刊名是 h1（页面主题）；内页的 h1 让给论文题名，
+     刊名降为 p 并加 .lj-masthead--inner 缩小，避免两个 h1 抢语义与视觉重心。 */ -}}
+
+{{- $isHome := eq .RelPermalink site.Home.RelPermalink -}}
+<header class="lj-masthead{{ if not $isHome }} lj-masthead--inner{{ end }}">
+  {{- if $isHome }}
+  <h1 class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></h1>
+  {{- else }}
+  <p class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></p>
+  {{- end }}
+  <p class="lj-masthead__motto">
+    <span lang="en">Speeches fade, snacks remain.</span>
+    <span>报告转瞬即逝，茶歇亘古长存</span>
+  </p>
+</header>

@@ -22,3 +22,6 @@ Thumbs.db
 
 # 本地预览截图
 /preview/
+
+# WorkBuddy 本地记忆（不入库）
+.workbuddy/

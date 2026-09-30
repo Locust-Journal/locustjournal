@@ -11,9 +11,15 @@
     <span class="lj-docstamp__kind">ARCHIVE</span>
   </div>
 
-  {{/* ---------- 刊名：西文 + 中文同行 ---------- */}}
-  <header class="lj-masthead lj-masthead--compact">
-    <h1 class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">总归档</span></h1>
+  {{/* ---------- 刊名 + 标语 + 栏目名 ----------
+       每一页都显示刊名与标语（辨识度），栏目名「总归档」作为 h1。 */}}
+  <header class="lj-masthead lj-masthead--inner">
+    <p class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></p>
+    <p class="lj-masthead__motto">
+      <span lang="en">Speeches fade, snacks remain.</span>
+      <span>报告转瞬即逝，茶歇亘古长存</span>
+    </p>
+    <h1 class="lj-masthead__section">总归档</h1>
   </header>
 
   <div class="lj-imprint">

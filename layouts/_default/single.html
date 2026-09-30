@@ -12,6 +12,11 @@
 {{- define "main" }}
 <article class="post-content">
 
+  {{/* ---------- 内页刊头 + 标语 ----------
+       每一页都显示刊名与标语，保证阅读路径上的辨识度。
+       内页 h1 让给论文题名，刊名在 partial 里降为 <p>，避免两个 h1。 */}}
+  {{ partial "lj-masthead.html" . }}
+
   {{/* ---------- 篇首 ---------- */}}
   <header class="lj-article-head">
     {{- with .Params.seq }}

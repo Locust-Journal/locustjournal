@@ -28,15 +28,19 @@
 
 <article class="lj-home">
 
-  {{/* ---------- 刊头：左对齐单行 ---------- */}}
-  <header class="lj-masthead">
-    <h1 class="lj-masthead__name">
-      {{ .Title }}{{ with .Params.cnname }} <span class="lj-masthead__cn">{{ . }}</span>{{ end }}
-    </h1>
+  {{/* ---------- 刊头：栏目名为主标题，刊名与标语作眉题 ----------
+       辨识度要求每一页都能看到刊名与标语；但列表页的 h1 应是
+       栏目名（蝗札 / 目录 / 学社随笔），刊名降为眉题小字，
+       否则「目录」二字被刊名压住，栏目入口就找不到了。 */}}
+  <header class="lj-masthead lj-masthead--inner">
+    <p class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></p>
     <p class="lj-masthead__motto">
       <span lang="en">Speeches fade, snacks remain.</span>
       <span>报告转瞬即逝，茶歇亘古长存</span>
     </p>
+    <h1 class="lj-masthead__section">
+      {{ .Title }}{{ with .Params.cnname }} <span class="lj-masthead__cn">{{ . }}</span>{{ end }}
+    </h1>
   </header>
 
   <div class="lj-imprint">

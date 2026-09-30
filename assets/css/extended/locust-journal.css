@@ -596,6 +596,22 @@ h6 {
   margin-bottom: 0;
 }
 
+/* 表格滚动容器：由 layouts/_default/_markup/table.html 自动包裹。
+   桌面上表格本身宽度 100%，容器不产生滚动；窄屏时表格固有宽度超出，
+   容器承接横向滚动，避免撑破视口。 */
+.post-content .lj-table-scroll {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.2rem 0;
+}
+
+.post-content .lj-table-scroll > table {
+  margin: 0;
+}
+
 /* 表格：保持学术三线表 */
 .post-content table {
   width: 100%;
@@ -1327,48 +1343,197 @@ article.post-content div.highlight pre.chroma > code {
    十三、窄屏适配
    ========================================================================== */
 
+/* ============================================================================
+   十三、响应式
+   ----------------------------------------------------------------------------
+   上一轮只按桌面期刊基准调版，没做移动端适配，结果手机上很乱：
+
+     1. 表格   宽 669px / 视口 390px —— 溢出 279px
+        原规则给 table 设了 overflow-x:auto + white-space:nowrap，
+        但 nowrap 让表格无法收缩，内容宽度直接顶破视口。
+        改为：表格放进 .lj-table-scroll 容器横向滚动，表格自身
+        保持 nowrap 但不再撑破布局；窄屏时单元格允许换行。
+
+     2. 代码块 pre > code 长命令溢出（实测 span.cl 宽 436px）
+        改为块级横向滚动，而不是让它撑宽。
+
+     3. 正文   桌面 17px 在 390px 宽下每行仅约 20 个汉字，且
+        仍带 text-indent:2em 与 justify，中文长文在窄屏非常难读。
+        窄屏降到 15.5px、取消缩进、取消两端对齐。
+
+     4. 刊名   桌面 32.8px 在手机上过大，抢正文注意力，降到 21px。
+
+     5. 断点   原来只有 760px 一个。补 1080px（平板）与 420px（小手机），
+        并把 nav 的 max-width 覆盖纳入，避免桌面 1080px 栏宽在平板上
+        仍按宽屏排版。
+   ========================================================================== */
+
+/* ---- 平板：栏宽收窄，导航恢复主题默认排布 ---- */
+@media (max-width: 1080px) {
+  :root {
+    --main-width: 100%;
+  }
+
+  .header-nav {
+    max-width: 100%;
+  }
+}
+
+/* ---- 手机 ---- */
 @media (max-width: 760px) {
-  .lj-masthead {
-    padding-top: 1.1rem;
-  }
-
-  .lj-masthead__name {
-    font-size: 1.4rem;
-  }
-
-  .lj-imprint {
-    font-size: 0.74rem;
-    padding: 0.4rem 0;
-  }
-
-  .lj-toc__title {
-    font-size: 1rem;
-  }
-
+  /* 正文：降字号、去缩进、去两端对齐。这是中文长文在窄屏可读性的关键。 */
   .post-content {
-    font-size: 0.98rem;
-    line-height: 1.8;
+    font-size: 15.5px;
+    line-height: 1.75;
     text-align: left;
   }
 
   .post-content > p {
     text-indent: 0;
+    margin-bottom: 0.7rem;
   }
 
+  .post-content h2 {
+    font-size: 1.12rem;
+    margin: 1.5rem 0 0.55rem;
+  }
+
+  .post-content h3 {
+    font-size: 1.02rem;
+    margin: 1.15rem 0 0.45rem;
+  }
+
+  .post-content h4 {
+    font-size: 0.98rem;
+  }
+
+  /* 刊名：桌面 32.8px 在手机上过大，降到 21px。 */
+  .lj-masthead {
+    padding: 0.8rem 0 0.4rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .lj-masthead__name {
+    font-size: 1.32rem;
+  }
+
+  .lj-masthead--inner {
+    padding: 0.7rem 0 0.35rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .lj-masthead--inner .lj-masthead__name {
+    font-size: 1rem;
+  }
+
+  .lj-masthead__section {
+    font-size: 1.32rem;
+    margin-top: 0.4rem;
+  }
+
+  .lj-masthead__motto,
+  .lj-masthead--inner .lj-masthead__motto {
+    font-size: 0.76rem;
+  }
+
+  /* 篇首：标题降一档，避免长中文标题在窄屏折成四五行 */
+  .lj-article-head__title {
+    font-size: 1.4rem;
+    line-height: 1.4;
+  }
+
+  .lj-article-head__titleEn {
+    font-size: 0.92rem;
+  }
+
+  .lj-abstract {
+    padding-left: 0.85rem;
+  }
+
+  .lj-abstract__body {
+    font-size: 0.92rem;
+  }
+
+  /* ---- 表格：关键修复 ----
+     不再给 table 加 nowrap（那正是撑破视口的原因），
+     改为外层容器滚动 + 单元格允许换行。 */
   .post-content table {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .post-content table thead,
-  .post-content table tbody {
     display: table;
     width: 100%;
+    max-width: 100%;
+    table-layout: auto;
+    white-space: normal;
+    font-size: 0.86rem;
   }
 
+  .post-content table th,
+  .post-content table td {
+    padding: 0.4rem 0.5rem;
+    /* 允许在词内换行，长中文单元格不再撑宽 */
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* 给表格套滚动容器（layouts/_default/_markup/table.html 自动包裹）。
+     容器宽度受父级约束，表格保持自身宽度并在其中横向滚动。 */
+  .post-content .lj-table-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 1rem 0;
+  }
+
+  .post-content .lj-table-scroll > table {
+    display: table;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    white-space: normal;
+    font-size: 0.86rem;
+  }
+
+  /* ---- 代码：块级横向滚动，不撑破布局 ---- */
+  .post-content pre {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .post-content pre code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    white-space: pre;
+  }
+
+  /* 行内 code 允许断行，否则长标识符会撑宽 */
+  .post-content p code,
+  .post-content li code,
+  .post-content td code,
+  .post-content th code {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* 图片、图表不撑破 */
+  .post-content img,
+  .post-content svg,
+  .post-content video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .post-content blockquote {
+    padding-left: 0.85rem;
+  }
+
+  /* 导航：横向滚动 + 边缘渐隐，替代换行挤成一团 */
   .header-nav {
     padding: 0 12px;
     column-gap: 12px;
@@ -1380,6 +1545,9 @@ article.post-content div.highlight pre.chroma > code {
     order: 3;
     column-gap: 14px;
     padding-bottom: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: var(--lj-rule) transparent;
     mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
@@ -1401,6 +1569,16 @@ article.post-content div.highlight pre.chroma > code {
 
   .menu a {
     font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .lj-imprint {
+    font-size: 0.74rem;
+    padding: 0.4rem 0;
+  }
+
+  .lj-toc__title {
+    font-size: 1rem;
   }
 
   .lj-docstamp {
@@ -1427,7 +1605,12 @@ article.post-content div.highlight pre.chroma > code {
   }
 
   .lj-essay__body {
-    font-size: 0.98rem;
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+
+  .lj-essay__title {
+    font-size: 1.35rem;
   }
 
   .lj-indexlist__item {
@@ -1448,6 +1631,33 @@ article.post-content div.highlight pre.chroma > code {
   .lj-submit {
     gap: 0.2rem 0.6rem;
     font-size: 0.74rem;
+  }
+}
+
+/* ---- 超小屏（iPhone SE 等 375–390px）---- */
+@media (max-width: 420px) {
+  .post-content {
+    font-size: 15px;
+  }
+
+  .post-content pre {
+    font-size: 0.78rem;
+  }
+
+  .post-content table {
+    font-size: 0.82rem;
+  }
+
+  .lj-masthead__name {
+    font-size: 1.2rem;
+  }
+
+  .lj-article-head__title {
+    font-size: 1.28rem;
+  }
+
+  .lj-review__score {
+    font-size: 0.9rem;
   }
 }
 

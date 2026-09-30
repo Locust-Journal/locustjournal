@@ -1,0 +1,41 @@
+{{- /* 表格渲染钩子 —— 自动包一层横向滚动容器。
+
+     为什么需要：文章里的对照表（如假说检验表）在桌面 1080px 栏宽下正常，
+     但在手机上表格固有宽度约 669px，远超 390px 视口。
+
+     之前靠 CSS 给 table 加 overflow-x:auto 解决，但 display:table 的
+     元素自身无法滚动 —— 滚动必须发生在一个有确定宽度的块级容器上。
+     所以要把 table 包进 div，让容器承接滚动。
+
+     ⚠️ 命名与路径必须是 render-table.html + layouts/_markup/：
+        - 文件名写成 table.html 会报
+          「unrecognized render hook template」（Hugo 只认 render-* 前缀）
+        - 目录必须是 layouts/_markup/，不是 layouts/_default/_markup/
+
+     表格需按 GFM 规范重建：thead / tbody 分组、单元格保留对齐方式。 */ -}}
+<div class="lj-table-scroll" role="region" tabindex="0" aria-label="数据表格，可横向滚动">
+  <table>
+    {{- with .THead }}
+    <thead>
+      {{- range . }}
+      <tr>
+        {{- range . }}
+        <th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</th>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </thead>
+    {{- end }}
+    {{- with .TBody }}
+    <tbody>
+      {{- range . }}
+      <tr>
+        {{- range . }}
+        <td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</td>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </tbody>
+    {{- end }}
+  </table>
+</div>

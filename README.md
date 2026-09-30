@@ -51,7 +51,7 @@ locustjournal/
 │   │       └── article02.md
 │   └── scholar/             # 蝗客学社（随笔，仅合规审核）
 │       ├── _index.md
-│       ├── essay01.md  essay02.md  essay03.md
+│       └── essay01.md
 ├── layouts/                 # 覆盖主题模板（不改 themes/）
 │   ├── baseof.html          # 替换废弃的 .Language.LanguageDirection
 │   ├── index.html           # 首页：封面 + 本卷要目

@@ -3,9 +3,10 @@
 /resources/
 .hugo_build.lock
 
-# Cloudflare Workers（本项目是纯静态 Hugo 站，不使用 Workers）
-# 若 dashboard 构建命令默认提示 npx wrangler deploy，请改用 Pages 构建。
-# 正确配置见 DEPLOY.md Step 3。
+# build.sh 的 Hugo 下载缓存（Cloudflare 构建时会复用）
+/.cache/
+
+# Cloudflare Workers 本地开发产物
 .wrangler/
 worker-configuration.d.ts
 
@@ -18,5 +19,6 @@ Thumbs.db
 .idea/
 *.swp
 *~
+
+# 本地预览截图
 /preview/
-public/

@@ -1,0 +1,42 @@
+{
+  // LOCUST Journal · Cloudflare Workers（Static Assets）配置
+  //
+  // 为什么是 Workers 而不是 Pages：
+  //   Cloudflare 已停止推荐 Pages（不再维护），官方把纯静态站也导向
+  //   Workers with Static Assets。Hugo 官方文档 gohugo.io/host-and-deploy/
+  //   给的就是这条路。两者静态请求都免费，成本无差异。
+  //
+  // 与旧 Pages 配置的字段对应关系：
+  //   pages_build_output_dir  →  assets.directory
+  //   （Pages 自动探测 404.html）→ assets.not_found_handling 必须显式声明
+  //
+  "name": "locustjournal",
+
+  // 必须字段：设为当天日期。Hugo 官方文档给的示例就是这个。
+  "compatibility_date": "2026-09-30",
+
+  "build": {
+    // 不用 `npx wrangler deploy` / `npx wrangler preview`：
+    // 那是纯 Worker 脚本（无构建步骤）的部署方式。
+    // 本站需要先跑 Hugo 构建，交给 build.sh 负责版本固定的构建。
+    "command": "chmod +x build.sh && ./build.sh"
+  },
+
+  "assets": {
+    // Hugo 的默认 publishDir，与 .gitignore 里的 /public/ 对应
+    "directory": "./public",
+
+    // 本站有自定义的 404 页（layouts/404.html，期刊语气「404 · 蝗迹未存」）。
+    // Workers 不会像 Pages 那样自动找 404.html，必须显式声明，否则
+    // 访问不存在的路径会返回 Cloudflare 默认错误页。
+    "not_found_handling": "404-page"
+  },
+
+  // 已有自有域名 locustjournal.com，不需要 workers.dev 临时域名。
+  // 关掉可以避免搜索引擎收录两个重复站点。
+  "workers_dev": false,
+
+  // 预览部署 URL 同样关掉：内容站没有分支预览的必要，
+  // 避免同一批稿件出现多个可被索引的重复 URL。
+  "preview_urls": false
+}

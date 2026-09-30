@@ -1184,7 +1184,52 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 /* ============================================================================
-   十三、窄屏适配
+   十四、页脚投稿栏
+   期刊页脚的投稿入口：与版权行之间用细栏线分隔，
+   「投　稿」二字用刊训体（宽字距），链接用赭石色。
+   ========================================================================== */
+
+.lj-submit {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin: 0 auto 0.7rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--lj-rule);
+  font-family: var(--lj-serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+
+.lj-submit__label {
+  color: var(--lj-ink-faint);
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+}
+
+.lj-submit__link {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--lj-accent);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+
+.lj-submit__link:hover {
+  color: var(--lj-ink);
+  border-bottom-color: var(--lj-ink);
+}
+
+.lj-submit__note {
+  color: var(--lj-ink-faint);
+  font-size: 0.74rem;
+}
+
+/* ============================================================================
+   十五、窄屏适配
    ========================================================================== */
 
 @media (max-width: 760px) {
@@ -1364,6 +1409,12 @@ article.post-content div.highlight pre.chroma > code {
     flex: 1 0 100%;
     text-align: left;
     padding-left: 2.4em;
+  }
+
+  /* 投稿栏窄屏折行居中 */
+  .lj-submit {
+    gap: 0.25rem 0.7rem;
+    font-size: 0.76rem;
   }
 }
 

@@ -3,19 +3,18 @@
 /resources/
 .hugo_build.lock
 
-# 编辑器
+# Cloudflare Workers（本项目是纯静态 Hugo 站，不使用 Workers）
+# 若 dashboard 构建命令默认提示 npx wrangler deploy，请改用 Pages 构建。
+# 正确配置见 DEPLOY.md Step 3。
+.wrangler/
+worker-configuration.d.ts
+
+# 系统垃圾
 .DS_Store
 Thumbs.db
-*.swp
-.idea/
-.vscode/
 
-# 系统
-.Library/
-.Trashes/
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*~

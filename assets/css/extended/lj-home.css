@@ -228,8 +228,12 @@
    左主栏放刊名与导语，右信息栏放卷期徽标与事实表。
    =========================================================================== */
 
+/* C 版首屏由双栏自身的下边线收口，ident 只承担那根分隔线。
+   若 hero 与 ident 各画一条线，会得到两条相距 43px 的横线，
+   中间夹一段无归属的空白带 —— 这是「断层」的成因。 */
 .lj-hero--C {
-  padding-bottom: 0.5rem;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .lj-hero--C .lj-hero__grid {
@@ -237,6 +241,16 @@
   grid-template-columns: minmax(0, 1fr) 232px;
   gap: 2.6rem;
   align-items: start;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+/* 紧跟双栏的身份行：贴住分隔线，不再自带下边线 */
+.lj-hero--C + .lj-ident,
+.lj-hero--C ~ .lj-ident {
+  margin: 0.55rem 0 1.9rem;
+  padding: 0;
+  border-bottom: 0;
 }
 
 .lj-hero--C .lj-hero__name {
@@ -279,10 +293,13 @@
   color: var(--lj-ink-faint);
 }
 
+/* 标签列固定 5em（正好容纳「出版周期」四字），值列左对齐。
+   早前用 auto 列 + 模板里的全角空格补齐，232px 右栏里标签列会被撑宽，
+   整块看起来松散。固定列宽后右侧形成一条竖直基准线。 */
 .lj-hero__facts {
   margin: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 5em minmax(0, 1fr);
   gap: 0.42rem 0.7rem;
   font-size: 0.76rem;
 }
@@ -453,3 +470,56 @@
 }
 
 
+
+/* ===========================================================================
+   首页编务入口（承接上方的分隔线分组）
+   四个链接跨度较大，纯靠 gap 仍显松散 —— 用细分隔点明确区隔，
+   形态对齐期刊封底的「栏目导航」。
+   =========================================================================== */
+
+.lj-home__links {
+  gap: 0.35rem 0;
+  align-items: center;
+  padding-top: 1.1rem;
+  margin-top: 1.6rem;
+  border-top: 1px solid var(--lj-rule);
+}
+
+.lj-home__links a {
+  font-family: var(--lj-serif);
+  font-size: 0.88rem;
+  padding: 0 1.15rem;
+  position: relative;
+}
+
+.lj-home__links a:first-child {
+  padding-left: 0;
+}
+
+.lj-home__links a + a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 0.85em;
+  background: var(--lj-rule-strong);
+}
+
+/* 窄屏折行后，行首链接不该再带前置竖线（否则上一行末尾会挂一根）。
+   行首由 layouts/index.html 里的脚本在 resize 时打标。 */
+.lj-home__links a.lj-home__link-first::before {
+  content: none;
+}
+
+@media (max-width: 760px) {
+  .lj-home__links a {
+    font-size: 0.85rem;
+    padding: 0 0.8rem;
+  }
+
+  .lj-home__links a.lj-home__link-first {
+    padding-left: 0;
+  }
+}

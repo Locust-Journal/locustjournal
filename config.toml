@@ -15,7 +15,7 @@ mainSections = ["articles"]
   description = "LOCUST Journal，收录全学科失败实验、翻车观测与脑洞实证，面向科研群体的趣味模拟学术刊物。"
   # 首页首屏视觉方案：A 现代数字期刊（默认） / B 纸刊强字号对比 / C 杂志式双栏
   # 三版并排对比见 /preview/
-  homeVariant = "A"
+  homeVariant = "C"
   defaultTheme = "light"
   disableThemeToggle = true
   showReadingTime = true

@@ -27,17 +27,15 @@
   {{/* ── 首屏视觉锚点：由 lj-home-hero partial 承载 ── */}}
   {{ partial "lj-home-hero.html" . }}
 
-  {{/* ── 期刊身份标识 ── */}}
+  {{/* ── 期刊身份标识 ──
+     C 版右侧栏已列「刊号 / 刊期 / 出版周期 / 编辑」，此处只补 ISSN、DOI
+     与开放获取声明 —— 重复列同一批字段会让首屏显得冗余。 ── */}}
   <div class="lj-ident">
     <span class="lj-ident__issn">ISSN 0000-0000（测试用）</span>
     <span class="lj-ident__sep">·</span>
-    <span class="lj-ident__item"><span class="lj-ident__label">刊号</span>LJ-2026-001</span>
+    <span class="lj-ident__item">DOI 前缀 10.0000/locust</span>
     <span class="lj-ident__sep">·</span>
-    <span class="lj-ident__item"><span class="lj-ident__label">刊期</span>2026 年 9 月</span>
-    <span class="lj-ident__sep">·</span>
-    <span class="lj-ident__item"><span class="lj-ident__label">出版周期</span>不定期</span>
-    <span class="lj-ident__sep">·</span>
-    <span class="lj-ident__item"><span class="lj-ident__label">编辑</span>LOCUST Journal Editorial Board</span>
+    <span class="lj-ident__item">开放获取 · CC BY-NC-ND 4.0</span>
   </div>
 
   {{/* ── 本卷要目 ── */}}
@@ -89,13 +87,36 @@
     {{- end }}
   </ul>
 
-  {{/* ── 编务入口 ── */}}
+  {{/* ── 编务入口 ──
+     链接间用 1px 竖线分隔（见 lj-home.css 的 a + a::before）。
+     窄屏折行时行首那个链接的竖线会悬在上一行末尾，CSS 无法判断
+     谁是行首 —— 这里用一段极小的脚本在 resize 时标记行首，
+     由 CSS 把行首的前置竖线关掉。 ── */}}
   <nav class="lj-home__links" aria-label="编务">
     <a href="/about/">发刊宗旨与编务体系</a>
     <a href="/guide/">投稿须知</a>
     <a href="/board/">编委会</a>
     <a href="/archive/">总归档</a>
   </nav>
+
+  <script>
+    (function () {
+      var nav = document.currentScript.previousElementSibling;
+      if (!nav || !nav.classList.contains('lj-home__links')) return;
+      var mark = function () {
+        var links = nav.querySelectorAll('a');
+        var lastTop = null;
+        for (var i = 0; i < links.length; i++) {
+          var top = Math.round(links[i].getBoundingClientRect().top);
+          var isFirst = i === 0 || top !== lastTop;
+          links[i].classList.toggle('lj-home__link-first', isFirst);
+          lastTop = top;
+        }
+      };
+      mark();
+      window.addEventListener('resize', mark);
+    })();
+  </script>
 
 </article>
 {{- end }}

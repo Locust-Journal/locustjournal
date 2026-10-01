@@ -15,9 +15,16 @@
     <span class="lj-docstamp__kind">LOCUST JOURNAL</span>
   </div>
 
-  {{/* ---------- 刊名：西文 + 中文同行 ---------- */}}
+  {{/* ---------- 刊名 + 标语 + 条文题名 ----------
+       章程类页面的 h1 是条文题名（如「LOCUST JOURNAL 章程」），
+       刊名与标语作眉题，保证每一页都能看到站点标识。 */}}
   <header class="lj-masthead lj-masthead--compact">
-    <h1 class="lj-masthead__name">{{ .Params.doctitle | default .Title }} <span class="lj-masthead__cn">{{ .Title }}</span></h1>
+    <p class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></p>
+    <p class="lj-masthead__motto">
+      <span lang="en">Locusts can read. They still only come for tea.</span>
+      <span>蝗虫识字，只赴茶歇</span>
+    </p>
+    <h1 class="lj-masthead__section">{{ .Params.doctitle | default .Title }} <span class="lj-masthead__cn">{{ .Title }}</span></h1>
   </header>
 
   <div class="lj-imprint">

@@ -193,7 +193,8 @@ Dashboard → Settings → Builds & deployments → Variables and secrets：
 BASE=https://locustjournal.com      # 或部署后拿到的 workers.dev 地址
 
 curl -sI $BASE | head -1                                    # 期望 HTTP/2 200
-curl -s $BASE/ | grep -o 'Speeches fade, snacks remain'     # 应有输出
+curl -s $BASE/ | grep -o 'Locusts can read'                   # 英文标语
+curl -s $BASE/ | grep -o '蝗虫识字，只赴茶歇'                   # 中文标语
 curl -s $BASE/ | grep -o 'LOCUST JOURNAL'                   # 刊头是否渲染
 curl -s -o /dev/null -w '%{http_code}\n' $BASE/articles/vol1/article01/  # 200
 curl -s -o /dev/null -w '%{http_code}\n' $BASE/assets/pdf/vol1/article01.pdf  # 200

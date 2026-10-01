@@ -5,9 +5,9 @@ draft: false
 type: "home"
 ---
 
-> **Speeches fade, snacks remain.**
+> **Locusts can read. They still only come for tea.**
 >
-> **报告转瞬即逝，茶歇亘古长存**
+> **蝗虫识字，只赴茶歇**
 
 ---
 

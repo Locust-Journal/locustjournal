@@ -43,19 +43,20 @@ export HUGO_CACHEDIR
 mkdir -p "${HUGO_CACHEDIR}" "${HOME}/.local"
 
 #------------------------------------------------------------------------------
-# 下载并安装 Hugo Extended
+# 解析当前平台对应的 Hugo 发行资产名
 #
-# 必须用 extended 包：普通包不支持 SCSS，且与本地的 +extended 产物不一致，
-# 会导致「本地样式正常、线上样式错乱」。
-#
-# 平台自动探测：Cloudflare 构建镜像是 linux-amd64，但本地 dry-run 在
-# macOS/arm64 上跑。早期硬编码 linux-amd64，导致本地一跑就报
-# "cannot execute binary file"（exit 126）。
+# 这里不能简单按 uname 拼 "${os}-${arch}"：Hugo 官方并不提供全平台矩阵。
+# 以 0.167.0 为例，extended 包在 Linux/Windows 有 tar.gz/zip，
+# 但在 macOS 只有 hugo_extended_<ver>_darwin-universal.pkg —— 没有
+# darwin-amd64、也没有 darwin-arm64 资产。早前"按 uname 自动探测"的
+# 写法在 macOS 上拼出 darwin-arm64，URL 返回 404，脚本直接死在那。
 #------------------------------------------------------------------------------
-HUGO_BIN_DIR="${HOME}/.local/hugo/bin"
-HUGO_BIN="${HUGO_BIN_DIR}/hugo"
+hugo_is_extended() {
+  # 参数是 hugo 可执行文件路径；判定标准是版本串里的 "+extended"
+  [[ -x "$1" ]] && "$1" version 2>/dev/null | grep -q "v${HUGO_VERSION}.*+extended"
+}
 
-hugo_platform() {
+hugo_asset_name() {
   local os arch
   case "$(uname -s)" in
     Linux)  os="linux" ;;
@@ -67,34 +68,93 @@ hugo_platform() {
     arm64|aarch64) arch="arm64" ;;
     *) echo "不支持的 CPU 架构：$(uname -m)" >&2; exit 1 ;;
   esac
-  echo "${os}-${arch}"
+
+  if [[ "${os}" == "darwin" ]]; then
+    # macOS 仅有 universal .pkg
+    echo "hugo_extended_${HUGO_VERSION}_darwin-universal.pkg"
+  else
+    echo "hugo_extended_${HUGO_VERSION}_${os}-${arch}.tar.gz"
+  fi
 }
 
-if [[ -x "${HUGO_BIN}" ]] && "${HUGO_BIN}" version 2>/dev/null | grep -q "v${HUGO_VERSION}.*+extended"; then
+#------------------------------------------------------------------------------
+# 安装 Hugo
+#
+# 优先复用缓存目录里已装好的版本；macOS 上退而使用 PATH 里已有的 hugo
+#（Homebrew 装的即是 +extended），都拿不到才从官方下载。
+#------------------------------------------------------------------------------
+HUGO_BIN_DIR="${HOME}/.local/hugo/bin"
+HUGO_BIN="${HUGO_BIN_DIR}/hugo"
+export PATH="${HUGO_BIN_DIR}:${PATH}"
+
+if hugo_is_extended "${HUGO_BIN}"; then
   echo "==> Hugo ${HUGO_VERSION} (extended) 已就绪，跳过下载"
+elif [[ "$(uname -s)" == "Darwin" ]] && command -v hugo >/dev/null 2>&1 && hugo_is_extended "$(command -v hugo)"; then
+  HUGO_BIN="$(command -v hugo)"
+  echo "==> 使用系统已安装的 Hugo（${HUGO_BIN}）"
 else
-  HUGO_PLATFORM="$(hugo_platform)"
-  echo "==> 下载 Hugo ${HUGO_VERSION} (extended, ${HUGO_PLATFORM})"
+  HUGO_ASSET="$(hugo_asset_name)"
+  HUGO_URL="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_ASSET}"
+  echo "==> 下载 Hugo ${HUGO_VERSION} (extended, ${HUGO_ASSET})"
   build_temp_dir="$(mktemp -d)"
 
-  HUGO_TARBALL="hugo_extended_${HUGO_VERSION}_${HUGO_PLATFORM}.tar.gz"
-  HUGO_URL="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_TARBALL}"
+  # curl -sfL 失败时只返回非零状态码、不输出任何诊断信息。这里补一层
+  # 显式检查：把 HTTP 状态和 URL 一起打出来，否则脚本会在这一步悄无声息
+  # 地死掉，而外层若还接着管道（./build.sh | tail），退出码会被管道末端的
+  # 命令覆盖成 0 —— "下载失败"就被伪装成了"构建成功"。
+  http_code=$(curl -sSL --retry 3 --retry-delay 2 \
+    -w '%{http_code}' -o "${build_temp_dir}/${HUGO_ASSET}" "${HUGO_URL}" || echo "000")
+  if [[ "${http_code}" != "200" ]]; then
+    echo "    下载失败：HTTP ${http_code} ← ${HUGO_URL}" >&2
+    echo "    若为 404，通常是 Hugo 该版本没有此平台的发行资产，" >&2
+    echo "    请对照 https://github.com/gohugoio/hugo/releases/tag/v${HUGO_VERSION} 核对。" >&2
+    exit 1
+  fi
 
-  curl -sfL --retry 3 --retry-delay 2 -o "${build_temp_dir}/${HUGO_TARBALL}" "${HUGO_URL}"
-
-  # tar 内是 hugo（单文件），解出来放进专用目录
   mkdir -p "${HUGO_BIN_DIR}"
-  tar -C "${HUGO_BIN_DIR}" -xzf "${build_temp_dir}/${HUGO_TARBALL}" hugo
+  case "${HUGO_ASSET}" in
+    *.tar.gz)
+      # tar 内是 hugo（单文件），解出来放进专用目录
+      tar -C "${HUGO_BIN_DIR}" -xzf "${build_temp_dir}/${HUGO_ASSET}" hugo
+      ;;
+    *.pkg)
+      # .pkg 是 xar 归档，Payload 内部再是一层 gzip cpio，取出 hugo 可执行文件
+      echo "    解包 .pkg 并提取 hugo 可执行文件"
+      (
+        cd "${build_temp_dir}"
+        xar -xf "${HUGO_ASSET}"
+        mkdir -p payload-out
+        # Payload 的 cpio 条目名是 ./hugo
+        cat Payload | gzip -dc | cpio -idmv --quiet ./hugo 2>/dev/null
+      )
+      if [[ -f "${build_temp_dir}/hugo" ]]; then
+        mv "${build_temp_dir}/hugo" "${HUGO_BIN}"
+      else
+        # 部分版本的包名带版本号目录，回退到全量提取
+        (
+          cd "${build_temp_dir}"
+          cat Payload | gzip -dc | cpio -idm --quiet
+        )
+        found_hugo=$(find "${build_temp_dir}" -type f -name hugo -perm -u+x -not -path '*/Payload*' | head -1)
+        [[ -n "${found_hugo}" ]] || { echo "    .pkg 内未找到 hugo 可执行文件" >&2; exit 1; }
+        mv "${found_hugo}" "${HUGO_BIN}"
+      fi
+      ;;
+  esac
   chmod +x "${HUGO_BIN}"
-fi
 
-export PATH="${HUGO_BIN_DIR}:${PATH}"
+  if ! hugo_is_extended "${HUGO_BIN}"; then
+    echo "    安装后的 hugo 版本或类型不符（需要 v${HUGO_VERSION} +extended）" >&2
+    "${HUGO_BIN}" version >&2 || true
+    exit 1
+  fi
+fi
 
 #------------------------------------------------------------------------------
 # 记录工具版本（构建日志里留痕，便于排查线上白屏类问题）
 #------------------------------------------------------------------------------
 echo "==> 工具版本"
-hugo version
+"${HUGO_BIN}" version
 
 #------------------------------------------------------------------------------
 # Git 配置
@@ -127,7 +187,7 @@ fi
 # deprecation warning 直接让整站部署失败。本地自己用严格模式把关。
 #------------------------------------------------------------------------------
 echo "==> 构建 Hugo 站点"
-hugo --gc --minify
+"${HUGO_BIN}" --gc --minify
 
 #------------------------------------------------------------------------------
 # 构建后自检 —— 防止「构建成功但产物不完整」被当成成功部署
@@ -221,6 +281,43 @@ fi
 page_count=$(find public -name "*.html" -type f | wc -l | tr -d ' ')
 echo "==> 构建完成：${page_count} 个 HTML 页面"
 echo "==> 输出目录：public/"
+
+#------------------------------------------------------------------------------
+# 刊名标语覆盖检查
+#
+# 站点辨识度要求：每一页都能看到刊名与标语。历史事故是清理旧标语时
+# 用过宽的正则，把三个自定义刊头（列表页 / 归档页 / 主题索引页）里的
+# motto 段落整段删掉却没补新的，构建照常通过，只有肉眼翻页才发现缺标语。
+#
+# 例外：404 页用的是一句改写过的标语（「蝗虫识字，只赴茶歇。但这一页…」），
+# 英文标语本就缺席，不纳入本项检查。
+#------------------------------------------------------------------------------
+echo "==> 校验刊名标语覆盖"
+motto_missing=0
+while IFS= read -r page; do
+  rel="${page#public/}"
+  if ! grep -q '蝗虫识字，只赴茶歇' "${page}"; then
+    echo "    缺中文标语：${rel}" >&2
+    motto_missing=1
+  fi
+  if ! grep -q 'Locusts can read' "${page}"; then
+    echo "    缺英文标语：${rel}" >&2
+    motto_missing=1
+  fi
+done < <(find public -name "*.html" -type f ! -name "404.html")
+
+# 旧标语必须彻底清零，避免两版标语同时出现在站点上
+stale=$(grep -rliE 'Speeches fade, snacks remain|报告转瞬即逝，茶歇亘古长存' public 2>/dev/null || true)
+if [[ -n "${stale}" ]]; then
+  echo "    仍存在旧标语残留：${stale}" >&2
+  motto_missing=1
+fi
+
+if [[ "${motto_missing}" -ne 0 ]]; then
+  echo "刊名标语覆盖不完整，终止部署。" >&2
+  exit 1
+fi
+echo "    全部页面均含刊名与标语"
 
 # 本脚本只负责「构建」，不负责「上传」。
 # 上传由 `wrangler deploy` 统一完成：它会先执行 wrangler.jsonc 里的

@@ -1,7 +1,7 @@
 # LOCUST Journal《学术蝗虫》
 
-> **Speeches fade, snacks remain.**
-> **报告转瞬即逝，茶歇亘古长存**
+> **Locusts can read. They still only come for tea.**
+> **蝗虫识字，只赴茶歇**
 
 非营利趣味模拟学术期刊，专收各类**无法在正式期刊发表的研究副产物**：失败的实验、离谱的观测、复现不出来的结论、实验室玄学现象、工程踩坑记录。
 

@@ -1,0 +1,455 @@
+/* ============================================================================
+   首页首屏视觉锚点 —— 三版方案
+   ----------------------------------------------------------------------------
+   2026-10 依据实测（eLife / PLOS Biology / Nature Comms / Frontiers）重做。
+
+   核心认知修正：前两轮把「学术感」做成了「印刷感」—— 衬线体、窄栏、
+   细线分隔、全站去颜色。实测现代数字期刊的共同点恰恰相反：
+     eLife        刊名 60px/700   栏目标题 22px/700   首屏彩色斜条
+     Frontiers    刊名 48px/500   栏目标题 24px/500   首屏大图
+     Nature Comms 刊名 32px/700   栏目标题 22px/700   衬线刊名
+     PLOS Biology 刊名 32px/400   栏目标题 15px/600
+   刊名与栏目标题的字号比在 1.3–2.7 倍之间 —— 强层级对比才是「专业感」来源。
+   本站此前 33px vs 17px，且整页密度均匀，没有任何元素承担视觉锚点，
+   这才是「土」的技术定义。
+
+   版本切换：site.Params.homeVariant = A | B | C
+   ========================================================================== */
+
+.lj-hero {
+  margin: 0 0 2.2rem;
+}
+
+/* ---------------------------------------------------------------------------
+   刊名：三版共用的骨架，字号与字重由各版本覆写
+   --------------------------------------------------------------------------- */
+.lj-hero__name {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--lj-ink);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.7rem;
+}
+
+.lj-hero__en {
+  display: block;
+  font-family: var(--lj-sans);
+  font-weight: 700;
+  color: var(--lj-ink);
+  /* 英文刊名必须在词间断行。缺这一条时，容器一旦变窄
+     （如对比页的三栏），整个刊名会被逐字符竖排成一条。 */
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+
+.lj-hero__cn {
+  font-family: var(--lj-serif);
+  font-weight: 400;
+  font-size: 0.34em;
+  color: var(--lj-ink-soft);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.lj-hero__motto {
+  margin: 0.9rem 0 0;
+  font-family: var(--lj-serif);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--lj-ink-soft);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.1rem;
+}
+
+.lj-hero__motto [lang="en"] {
+  font-style: italic;
+  color: var(--lj-ink-faint);
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+
+.lj-hero__motto-cn {
+  color: var(--lj-ink-soft);
+}
+
+.lj-hero__lede {
+  margin: 1.1rem 0 0;
+  max-width: 34em;
+  font-family: var(--lj-serif);
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--lj-ink-soft);
+}
+
+.lj-hero__rule {
+  margin: 1.4rem 0 0;
+  border: 0;
+  border-top: 2px solid var(--lj-ink);
+}
+
+.lj-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+}
+
+.lj-hero__cta {
+  display: inline-block;
+  padding: 0.55rem 1.3rem;
+  font-family: var(--lj-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--lj-paper);
+  background: var(--lj-ink);
+  border: 1px solid var(--lj-ink);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.lj-hero__cta:hover {
+  opacity: 0.82;
+  color: var(--lj-paper);
+}
+
+.lj-hero__cta--ghost {
+  color: var(--lj-ink);
+  background: transparent;
+}
+
+.lj-hero__cta--ghost:hover {
+  background: rgba(0, 0, 0, 0.05);
+  opacity: 1;
+}
+
+/* ===========================================================================
+   版本 A：现代数字期刊（默认）
+   巨刊名 + CSS 斜条色带 + 双 CTA。对标 eLife 首屏。
+   =========================================================================== */
+
+.lj-hero--A .lj-hero__name {
+  font-size: 4.1rem;
+}
+
+.lj-hero--A .lj-hero__cn {
+  font-size: 1.55rem;
+}
+
+.lj-hero--A .lj-hero__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5rem;
+}
+
+.lj-hero--A .lj-hero__head {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 斜条色带：纯 CSS 图形，不引入外部图片资源。
+   斜切角度与色相取自期刊常见的品牌色处理。 */
+.lj-hero--A .lj-hero__art {
+  flex: 0 0 auto;
+  position: relative;
+  width: 210px;
+  height: 132px;
+  margin-top: 0.3rem;
+  overflow: hidden;
+}
+
+.lj-hero__stripe {
+  position: absolute;
+  width: 15px;
+  height: 172px;
+  transform: rotate(38deg);
+  border-radius: 8px;
+}
+
+.lj-hero__stripe--1 { left: 12px;  top: -22px; background: #1c56a8; }
+.lj-hero__stripe--2 { left: 58px;  top: -8px;  background: #2f7d4f; height: 152px; }
+.lj-hero__stripe--3 { left: 104px; top: -30px; background: #b8791f; height: 178px; }
+.lj-hero__stripe--4 { left: 150px; top: -14px; background: #8e2f47; height: 158px; }
+
+.lj-hero__dot {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.lj-hero__dot--1 {
+  width: 15px; height: 15px;
+  left: 44px; top: 74px;
+  background: #1c56a8;
+}
+
+.lj-hero__dot--2 {
+  width: 9px; height: 9px;
+  left: 128px; top: 96px;
+  background: #8e2f47;
+}
+
+/* ===========================================================================
+   版本 B：纸刊范式 + 强字号对比
+   保留白底衬线架构，但把刊名与栏目标题的字号拉到两极。
+   =========================================================================== */
+
+.lj-hero--B .lj-hero__name {
+  font-family: var(--lj-serif);
+  font-size: 3.4rem;
+  letter-spacing: 0.01em;
+}
+
+.lj-hero--B .lj-hero__en {
+  font-family: var(--lj-serif);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.lj-hero--B .lj-hero__cn {
+  font-size: 1.15rem;
+  color: var(--lj-ink-soft);
+}
+
+/* B 版刻意把正文压小、刊名放大，制造 2.4 倍的层级落差 */
+.lj-hero--B + .lj-ident,
+.lj-hero--B ~ .lj-ident {
+  margin-top: 0;
+}
+
+/* ===========================================================================
+   版本 C：杂志式双栏
+   左主栏放刊名与导语，右信息栏放卷期徽标与事实表。
+   =========================================================================== */
+
+.lj-hero--C {
+  padding-bottom: 0.5rem;
+}
+
+.lj-hero--C .lj-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 232px;
+  gap: 2.6rem;
+  align-items: start;
+}
+
+.lj-hero--C .lj-hero__name {
+  font-size: 2.9rem;
+}
+
+.lj-hero--C .lj-hero__cn {
+  font-size: 1.1rem;
+}
+
+.lj-hero--C .lj-hero__cta {
+  margin-top: 1.4rem;
+}
+
+.lj-hero--C .lj-hero__aside {
+  border-left: 1px solid var(--lj-rule);
+  padding-left: 1.4rem;
+}
+
+.lj-hero__badge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-hero__badge-k {
+  font-family: var(--lj-sans);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--lj-ink);
+}
+
+.lj-hero__badge-v {
+  font-family: var(--lj-serif);
+  font-size: 0.8rem;
+  color: var(--lj-ink-faint);
+}
+
+.lj-hero__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.42rem 0.7rem;
+  font-size: 0.76rem;
+}
+
+.lj-hero__facts dt {
+  color: var(--lj-ink-faint);
+  white-space: nowrap;
+}
+
+.lj-hero__facts dd {
+  margin: 0;
+  color: var(--lj-ink-soft);
+}
+
+/* ===========================================================================
+   响应式
+   =========================================================================== */
+
+@media (max-width: 1080px) {
+  .lj-hero--A .lj-hero__name { font-size: 3.3rem; }
+  .lj-hero--A .lj-hero__cn { font-size: 1.3rem; }
+  .lj-hero--B .lj-hero__name { font-size: 2.9rem; }
+  .lj-hero--C .lj-hero__grid { grid-template-columns: minmax(0, 1fr) 200px; gap: 1.8rem; }
+  .lj-hero--C .lj-hero__name { font-size: 2.5rem; }
+}
+
+@media (max-width: 760px) {
+  .lj-hero { margin-bottom: 1.7rem; }
+
+  .lj-hero--A .lj-hero__top { display: block; }
+  .lj-hero--A .lj-hero__art {
+    width: 100%;
+    height: 74px;
+    margin-top: 1.2rem;
+  }
+  .lj-hero__stripe { height: 108px; width: 11px; }
+  .lj-hero__stripe--1 { left: 6%;  top: -14px; }
+  .lj-hero__stripe--2 { left: 28%; top: -6px;  height: 96px; }
+  .lj-hero__stripe--3 { left: 50%; top: -18px; height: 112px; }
+  .lj-hero__stripe--4 { left: 72%; top: -8px;  height: 100px; }
+  .lj-hero__dot--1 { left: 20%; top: 42px; }
+  .lj-hero__dot--2 { left: 62%; top: 56px; }
+
+  .lj-hero--A .lj-hero__name { font-size: 2.3rem; }
+  .lj-hero--A .lj-hero__cn { font-size: 1rem; }
+  .lj-hero--B .lj-hero__name { font-size: 2.1rem; }
+  .lj-hero--B .lj-hero__cn { font-size: 0.9rem; }
+
+  .lj-hero--C .lj-hero__grid { grid-template-columns: 1fr; gap: 1.6rem; }
+  .lj-hero--C .lj-hero__name { font-size: 2.1rem; }
+  .lj-hero--C .lj-hero__aside {
+    border-left: 0;
+    border-top: 1px solid var(--lj-rule);
+    padding-left: 0;
+    padding-top: 1.2rem;
+  }
+
+  .lj-hero__motto { font-size: 0.86rem; }
+  .lj-hero__lede { font-size: 0.93rem; }
+  .lj-hero__actions { gap: 0.55rem; }
+  .lj-hero__cta { padding: 0.5rem 1.05rem; font-size: 0.82rem; }
+}
+
+/* ===========================================================================
+   方案对比页 /preview/
+   三列并排。窄屏降为单列纵向排列。
+   =========================================================================== */
+
+.lj-preview__head {
+  margin-bottom: 1.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--lj-ink);
+}
+
+.lj-preview__head h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--lj-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.lj-preview__note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--lj-ink-soft);
+}
+
+.lj-preview__note code {
+  font-family: var(--lj-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+}
+
+/* 单列纵向排列。三栏并排时每格仅约 190px 宽，巨刊名会被迫
+   折行，评估不出真实效果 —— 对比必须在与正式页相近的宽度下看。 */
+.lj-preview__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 820px;
+}
+
+.lj-preview__cell {
+  border: 1px solid var(--lj-rule);
+  border-radius: 3px;
+  background: var(--lj-paper);
+  overflow: hidden;
+}
+
+.lj-preview__label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-preview__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  font-family: var(--lj-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--lj-paper);
+  background: var(--lj-ink);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lj-preview__name {
+  font-family: var(--lj-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--lj-ink);
+}
+
+
+
+.lj-preview__frame .lj-hero {
+  margin-bottom: 1.3rem;
+}
+
+.lj-preview__frame { padding: 1.8rem 1.6rem 2rem; }
+
+.lj-preview__meta {
+  padding: 0.75rem 0.9rem 0.9rem;
+  border-top: 1px solid var(--lj-rule);
+  font-size: 0.74rem;
+  line-height: 1.65;
+}
+
+.lj-preview__ref {
+  margin: 0 0 0.3rem;
+  color: var(--lj-ink-soft);
+  font-weight: 500;
+}
+
+.lj-preview__desc {
+  margin: 0;
+  color: var(--lj-ink-faint);
+}
+
+

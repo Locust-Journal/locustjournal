@@ -1,21 +1,33 @@
-{{- /* LOCUST Journal 首页 —— 学术期刊卷期目录页
-     排版基准：IEEE Spectrum / ACM TOCS / ScienceDirect 实测的期刊目录形态。
-       左对齐细体刊头 + 单线分隔 + 连续条目 + 缩进分层，无居中装饰、无徽章。
-     刻意不显示 PaperMod 的博客卡片流：期刊首页是「卷期目录页」，不是文章列表。
+{{- /* LOCUST Journal 首页 —— 期刊卷期目录
+     -----------------------------------------------------------------------
+     2026-10 改版要点（依据对 eLife / PLOS Biology / Nature Comms / Frontiers
+     的实测，见 .workbuddy/memory/2026-10-01.md）：
 
-     刊头抽成 layouts/partials/lj-masthead.html，与内页共用，
-     保证「每一页都能看到刊名与标语」的辨识度。 */ -}}
+     前两轮把「学术感」做成了「印刷感」—— 衬线体、窄栏、细线、去颜色，
+     结果像 1998 年的目录页。实测现代数字期刊的共同点是「强字号层级对比」：
+       eLife       刊名 60px/700，栏目标题 22px/700
+       Frontiers   刊名 48px/500
+       Nature Comms 刊名 32px/700 衬线
+       PLOS Biology 刊名 32px/400，栏目标题仅 15px/600
+     刊名与栏目标题的字号比都在 1.3–2.7 倍之间，而本站此前是 33px vs 17px
+     （仅 1.9 倍且都偏小），整页密度均匀、没有视觉锚点 —— 这是「土」的
+     技术定义。
 
+     本轮改动：
+       1. 首页精简为「刊名 + 标语 + 身份标识 + 本卷要目 + 学社随笔」，
+          刊名缘起 / 栏目设置 / 办刊原则下沉到发刊宗旨页（/about/），
+          首屏不再被文字填满
+       2. 视觉版本由 partial "lj-home-hero.html" 切换，preview 页可对比
+       3. 保留全部期刊身份标识（ISSN / 刊号 / 刊期）
+     */ -}}
 
 {{- define "main" }}
 <article class="lj-home">
 
-  {{/* ---------- 刊头：左对齐单行，下方主线分隔 ---------- */}}
-  {{ partial "lj-masthead.html" . }}
+  {{/* ── 首屏视觉锚点：由 lj-home-hero partial 承载 ── */}}
+  {{ partial "lj-home-hero.html" . }}
 
-  {{/* ---------- 期刊身份标识 ----------
-     实测 PLOS ONE 首页首屏有 ISSN 标识，这是「这是一本刊物」最直接���视觉
-     信号。之前完全缺失，是不像期刊的主因之一。 */}}
+  {{/* ── 期刊身份标识 ── */}}
   <div class="lj-ident">
     <span class="lj-ident__issn">ISSN 0000-0000（测试用）</span>
     <span class="lj-ident__sep">·</span>
@@ -28,13 +40,9 @@
     <span class="lj-ident__item"><span class="lj-ident__label">编辑</span>LOCUST Journal Editorial Board</span>
   </div>
 
-  {{/* ---------- 本卷要目 ----------
-     条目结构与 arXiv 一致：篇次 + 标题 + 作者单位行 + 指数/页码行。
-     不再把指数做成边框徽章，也不再让 meta 独占右侧一列。 */}}
+  {{/* ── 本卷要目 ── */}}
   <h2 class="lj-section-head">本卷要目</h2>
 
-  {{/* 按 seq 字段排序（"01" < "02"）。不用 ByWeight —— 两篇都没有 weight，
-       ByWeight 会退化成不确定顺序，曾导致 8.3 排在 7.8 前面。 */}}
   {{- $arts := where site.RegularPages "Section" "articles" }}
   {{- $ordered := sort $arts "Params.seq" }}
 
@@ -44,6 +52,9 @@
         <div class="lj-toc__main">
           <span class="lj-toc__index">蝗札 {{ .Params.seq | default "—" }}</span>
           <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
+          {{- with .Params.summary }}
+          <span class="lj-toc__abstract">{{ . }}</span>
+          {{- end }}
           <span class="lj-toc__byline">
             {{- with .Params.authors }}{{ delimit . "、" }}{{ end }}
             {{- with .Params.affiliation }}　{{ . }}{{ end }}
@@ -52,15 +63,16 @@
         <div class="lj-toc__meta">
           <span class="lj-index__label">蝗掠指数</span>
           <span class="lj-index">{{ .Params.locust_index | default "—" }}</span>
-          <span class="lj-folio">第 1 卷 · p.{{ .Params.page | default "—" }}</span>
+          <span class="lj-folio">p.{{ .Params.page | default "—" }}</span>
+          {{- with .Params.pdf }}
+          <a class="lj-toc__pdf" href="{{ . | relURL }}">PDF</a>
+          {{- end }}
         </div>
       </li>
     {{- end }}
   </ul>
 
-  {{/* ---------- 学社随笔另列 ----------
-       随笔不配发蝗掠指数、不属于本卷正式刊载内容，
-       混进「本卷要目」会让读者误以为它与蝗札同级。 */}}
+  {{/* ── 学社随笔另列 ── */}}
   <h2 class="lj-section-head">学社随笔</h2>
 
   <ul class="lj-toc lj-toc--plain">
@@ -77,36 +89,13 @@
     {{- end }}
   </ul>
 
-  {{/* ---------- 刊名缘起 ---------- */}}
-  <h2 class="lj-section-head">刊名缘起</h2>
+  {{/* ── 编务入口 ── */}}
+  <nav class="lj-home__links" aria-label="编务">
+    <a href="/about/">发刊宗旨与编务体系</a>
+    <a href="/guide/">投稿须知</a>
+    <a href="/board/">编委会</a>
+    <a href="/archive/">总归档</a>
+  </nav>
 
-  <div class="post-content">
-    <p>「学术蝗虫」，科研圈通识之梗：专指奔赴各类学术会议，不专注报告交流，惟以扫荡茶歇点心为要务的参会群体。后引申喻指批量产出、缺乏实质贡献的灌水研究与冗余文稿。</p>
-    <p>本刊以此为名，专收各类<strong>无法在正式期刊发表的研究副产物</strong>：失败的实验、离谱的观测、复现不出来的结论、实验室玄学现象、工程踩坑记录。以标准学术论文之形制，承载科研从业者之自嘲、复盘与脑洞。</p>
-  </div>
-
-  {{/* ---------- 栏目设置 ---------- */}}
-  <h2 class="lj-section-head">栏目设置</h2>
-
-  <div class="post-content">
-    <h3>蝗札 · Articles</h3>
-    <p>本刊正式刊载篇目，经双盲趣味评审通过，具备完整的论文结构与实验叙事。每篇配发<strong>蝗掠指数（Locust Index）</strong>：指数越高，代表实验翻车越扎实、脑洞越严谨、学术灌水越浑然天成。</p>
-    <h3>蝗客学社 · Locust Scholar</h3>
-    <p>随笔栏目，收录会议观测手记、科研日常吐槽、实验心路复盘。仅做合规性审核，不经过完整双盲评审，不纳入正式蝗札序列。</p>
-  </div>
-
-  <hr class="lj-rule">
-
-  {{/* ---------- 编务 ---------- */}}
-  <div class="post-content">
-    <h3>办刊原则</h3>
-    <p>小圈子存续，不盲目出圈；趣味性优先，不追求意义；纯非盈利运营，不沾染商业。</p>
-    <p class="lj-home__links">
-      <a href="/about/">发刊宗旨与编务体系</a>
-      <a href="/guide/">投稿须知</a>
-      <a href="/board/">编委会</a>
-      <a href="/archive/">总归档</a>
-    </p>
-  </div>
-
+</article>
 {{- end }}

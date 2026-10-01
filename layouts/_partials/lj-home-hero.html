@@ -1,0 +1,92 @@
+{{- /* 首页首屏视觉锚点
+     -----------------------------------------------------------------------
+     三版视觉切换，优先级：
+       1. 调用方显式传 variant（对比页 layouts/preview.html 用此路径）
+       2. site.Params.homeVariant（首页正式版用此路径）
+       3. 缺省 A
+
+     实现注意：首页传进来的是 pageState，Go 模板既不能用 `with .variant`
+     也不能用 `index . "variant"` —— 两者遇到非 map 类型都直接报错
+     （can't evaluate field / can't index item）。
+     故用 reflect.IsMap 判断类型：只有 map 才取 key，其余一律走 site 参数。
+     */ -}}
+{{- $v := "" -}}
+{{- if reflect.IsMap . -}}
+  {{- with index . "variant" }}{{ $v = . }}{{ end -}}
+{{- end -}}
+{{- if not $v }}{{ $v = site.Params.homeVariant | default "A" }}{{ end }}
+
+<div class="lj-hero lj-hero--{{ $v }}">
+
+  {{- if eq $v "C" }}
+  {{/* ── C：杂志式双栏 ── */}}
+  <div class="lj-hero__grid">
+    <div class="lj-hero__lead">
+      <h1 class="lj-hero__name">
+        <span class="lj-hero__en">LOCUST JOURNAL</span>
+        <span class="lj-hero__cn">学术蝗虫</span>
+      </h1>
+      <p class="lj-hero__motto">
+        <span lang="en">Locusts can read. They still only come for tea.</span>
+        <span class="lj-hero__motto-cn">蝗虫识字，只赴茶歇</span>
+      </p>
+      <p class="lj-hero__lede">专收无法在正式期刊发表的研究副产物：失败的实验、离谱的观测、复现不出来的结论、实验室玄学现象与工程踩坑记录。</p>
+      <a class="lj-hero__cta" href="/articles/">浏览本卷要目</a>
+    </div>
+    <aside class="lj-hero__aside">
+      <div class="lj-hero__badge">
+        <span class="lj-hero__badge-k">第 1 卷</span>
+        <span class="lj-hero__badge-v">内测号</span>
+      </div>
+      <dl class="lj-hero__facts">
+        <dt>刊　号</dt><dd>LJ-2026-001</dd>
+        <dt>刊　期</dt><dd>2026 年 9 月</dd>
+        <dt>出版周期</dt><dd>不定期</dd>
+        <dt>编辑</dt><dd>Editorial Board</dd>
+      </dl>
+    </aside>
+  </div>
+
+  {{- else if eq $v "B" }}
+  {{/* ── B：纸刊范式 + 强字号对比 ── */}}
+  <h1 class="lj-hero__name lj-hero__name--serif">
+    <span class="lj-hero__en">LOCUST JOURNAL</span>
+    <span class="lj-hero__cn">学术蝗虫</span>
+  </h1>
+  <p class="lj-hero__motto">
+    <span lang="en">Locusts can read. They still only come for tea.</span>
+    <span class="lj-hero__motto-cn">蝗虫识字，只赴茶歇</span>
+  </p>
+  <p class="lj-hero__rule"></p>
+
+  {{- else }}
+  {{/* ── A：现代数字期刊（默认） ── */}}
+  <div class="lj-hero__top">
+    <div class="lj-hero__head">
+      <h1 class="lj-hero__name">
+        <span class="lj-hero__en">LOCUST JOURNAL</span>
+        <span class="lj-hero__cn">学术蝗虫</span>
+      </h1>
+      <p class="lj-hero__motto">
+        <span lang="en">Locusts can read. They still only come for tea.</span>
+        <span class="lj-hero__motto-cn">蝗虫识字，只赴茶歇</span>
+      </p>
+    </div>
+    {{/* CSS 绘制的斜条色带，呼应「蝗虫」意象，不依赖外部图片 */}}
+    <div class="lj-hero__art" aria-hidden="true">
+      <span class="lj-hero__stripe lj-hero__stripe--1"></span>
+      <span class="lj-hero__stripe lj-hero__stripe--2"></span>
+      <span class="lj-hero__stripe lj-hero__stripe--3"></span>
+      <span class="lj-hero__stripe lj-hero__stripe--4"></span>
+      <span class="lj-hero__dot lj-hero__dot--1"></span>
+      <span class="lj-hero__dot lj-hero__dot--2"></span>
+    </div>
+  </div>
+  <p class="lj-hero__lede">专收无法在正式期刊发表的研究副产物：失败的实验、离谱的观测、复现不出来的结论、实验室玄学现象与工程踩坑记录。</p>
+  <div class="lj-hero__actions">
+    <a class="lj-hero__cta" href="/articles/">浏览本卷要目</a>
+    <a class="lj-hero__cta lj-hero__cta--ghost" href="/guide/">投稿须知</a>
+  </div>
+  {{- end }}
+
+</div>

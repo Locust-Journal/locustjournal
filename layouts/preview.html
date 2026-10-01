@@ -1,0 +1,69 @@
+{{- /* 首页视觉方案对比页 /preview/
+     ────────────────────────────────────────────────────────────────════---
+     把三版首屏并排渲染，供选定方向用。带完整站点 chrome（页眉/页脚），
+     便于判断与整站的协调性，而不只是看 hero 局部。
+
+     访问：https://locustjournal.com/preview/
+     */ -}}
+{{- define "main" }}
+<article class="lj-preview">
+
+  <header class="lj-preview__head">
+    <h1>首页视觉方案对比</h1>
+    <p class="lj-preview__note">
+      三版首屏并排。选定后把 <code>homeVariant</code> 设为对应字母（A / B / C）即可。
+      各版下方列出与真实期刊的实测对照。
+    </p>
+  </header>
+
+  <div class="lj-preview__grid">
+
+    {{- range slice
+      (dict "k" "A" "name" "现代数字期刊" "ref" "eLife 首屏：巨刊名 + 彩色斜条 + 双 CTA"
+            "desc" "刊名 4.1rem/700，色带为纯 CSS 图形。视觉冲击最强，最不像「目录页」。")
+      (dict "k" "B" "name" "纸刊范式 + 强字号对比" "ref" "Nature Comms：衬线刊名但字号克制"
+            "desc" "保留白底衬线架构，把刊名与栏目标题字号拉到两极，用对比替代装饰。")
+      (dict "k" "C" "name" "杂志式双栏" "ref" "Nature Comms 信息密度：左目录右信息栏"
+            "desc" "右栏放卷期徽标与事实表，接近成熟出版品牌的信息组织。")
+    }}
+    <section class="lj-preview__cell">
+      <div class="lj-preview__label">
+        <span class="lj-preview__key">{{ .k }}</span>
+        <span class="lj-preview__name">{{ .name }}</span>
+      </div>
+      <div class="lj-preview__frame">
+        {{ partial "lj-home-hero.html" (dict "page" . "variant" .k) }}
+        <div class="lj-ident">
+          <span class="lj-ident__issn">ISSN 0000-0000（测试用）</span>
+          <span class="lj-ident__sep">·</span>
+          <span class="lj-ident__item"><span class="lj-ident__label">刊号</span>LJ-2026-001</span>
+          <span class="lj-ident__sep">·</span>
+          <span class="lj-ident__item"><span class="lj-ident__label">刊期</span>2026 年 9 月</span>
+        </div>
+        <h2 class="lj-section-head">本卷要目</h2>
+        <ul class="lj-toc">
+          {{- range (sort (where site.RegularPages "Section" "articles") "Params.seq") }}
+          <li class="lj-toc__item">
+            <div class="lj-toc__main">
+              <span class="lj-toc__index">蝗札 {{ .Params.seq }}</span>
+              <span class="lj-toc__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></span>
+              {{- with .Params.summary }}<span class="lj-toc__abstract">{{ . }}</span>{{ end }}
+            </div>
+            <div class="lj-toc__meta">
+              <span class="lj-index__label">蝗掠指数</span>
+              <span class="lj-index">{{ .Params.locust_index }}</span>
+            </div>
+          </li>
+          {{- end }}
+        </ul>
+      </div>
+      <div class="lj-preview__meta">
+        <p class="lj-preview__ref">对标：{{ .ref }}</p>
+        <p class="lj-preview__desc">{{ .desc }}</p>
+      </div>
+    </section>
+    {{- end }}
+
+  </div>
+</article>
+{{- end }}

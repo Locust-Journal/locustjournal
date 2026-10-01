@@ -1,50 +1,45 @@
-{{- /* LOCUST Journal 页脚 —— 覆盖 PaperMod footer.html
-     唯一改动：在版权行上方插入「投稿」常驻栏。
-     其余逻辑原样沿用主题，请勿手抄 JS，升级主题时直接重新 diff 本文件。 */ -}}
+{{- /* LOCUST Journal 页脚 —— 期刊版权行 + 免责声明
+     覆盖 PaperMod 的 layouts/_partials/footer.html。
 
+     为什么改：
+     1. 首页原先把「纯娱乐性质的模拟学术刊物」做成首屏告警框，占掉了最显眼
+        的位置。真实学术期刊首页不放免责声明，只在页脚以小字版权行声明。
+     2. 期刊页脚的典型形态是「ISSN / 版权年份 / 出版方 / 许可」一行，
+        主题原版只有「Powered by Hugo & PaperMod」，不像出版物。
+
+     主题 footer 里的锚点平滑滚动、回到顶部、代码复制脚本一并保留，
+     主题切换脚本不保留（本刊固定浅色）。 */ -}}
 {{- if not (.Param "hideFooter") }}
-<footer class="footer">
-    {{- /* ---------- 投稿栏 ----------
-       真实期刊页脚都有投稿入口，这里是全站唯一必须在每页出现的转化点。
-       只插入这一段，其余逻辑（版权行、回到顶部、锚点平滑、代码复制）
-       原样沿用主题，避免手抄 JS 出错。 */}}
-    <div class="lj-submit">
-      <span class="lj-submit__label">投　稿</span>
-      <a class="lj-submit__link" href="https://buno.dev/locustjournal">点击此处</a>
-      <span class="lj-submit__note">长期开放　全学科征稿　不收任何费用</span>
-    </div>
+<footer class="footer lj-footer">
 
-    {{- if not site.Params.footer.hideCopyright }}
-        {{- if site.Copyright }}
-        <span>{{ site.Copyright | markdownify }}</span>
-        {{- else }}
-        <span>&copy; {{ now.Year }} <a href="{{ "" | absLangURL }}">{{ site.Title }}</a></span>
-        {{- end }}
-        {{- print " · "}}
-    {{- end }}
+  <div class="lj-footer__notice">
+    本刊为<b>纯娱乐性质的模拟学术刊物</b>，不属于正式出版物，所刊载内容不具备任何学术效力，
+    不可用于毕业、评奖、职称认定与项目申报。本刊永久免费，不收取任何版面费、审稿费与处理费。
+  </div>
 
-    {{- with site.Params.footer.text }}
-        {{ . | markdownify }}
-        {{- print " · "}}
-    {{- end }}
+  <div class="lj-footer__ident">
+    <span class="lj-footer__issn">ISSN 0000-0000（测试用）</span>
+    <span class="lj-footer__sep">·</span>
+    <span>刊号 LJ-2026-001</span>
+    <span class="lj-footer__sep">·</span>
+    <span>第 1 卷 · 内测号</span>
+    <span class="lj-footer__sep">·</span>
+    <span>2026 年 9 月出版</span>
+  </div>
 
-    {{/*
-        - The "Powered by Hugo" text is intentionally left at the end of the footer to give it more prominence.
-        - We kindly encourage you to keep this line. Keeping this credit helps open source projects like PaperMod and Hugo reach more people, supports the open source ecosystem, and shows appreciation for the work that goes into these tools.
-        - If you choose to remove it, please consider adding a link to the PaperMod GitHub repository somewhere on your site to give credit to the project and its contributors.
-        - Support us by sponsoring the project on GitHub Sponsors: https://github.com/sponsors/adityatelange
-    */}}
-    
-    <span>
-        Powered by
-        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>
+  <div class="lj-footer__copy">
+    <span>&copy; 2026 LOCUST Journal《学术蝗虫》编辑部</span>
+    <span class="lj-footer__sep">·</span>
+    <span>非营利 · 永久免费开放获取</span>
+    <span class="lj-footer__sep">·</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener" target="_blank">Hugo</a> &amp; <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a></span>
+  </div>
+
 </footer>
 {{- end }}
 
 {{- if (not site.Params.disableScrollToTop) }}
-<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+<a href="#top" id="top-link" class="top-link hidden" aria-label="回到顶部" title="回到顶部 (Alt + G)" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
         <polyline points="17 11 12 6 7 11"></polyline>
@@ -58,12 +53,10 @@
 <script>
     let menu = document.getElementById('menu');
     if (menu) {
-        // Set the scroll position
         const scrollPosition = localStorage.getItem("menu-scroll-position");
         if (scrollPosition) {
             menu.scrollLeft = parseInt(scrollPosition, 10);
         }
-        
         menu.onscroll = function () {
             localStorage.setItem("menu-scroll-position", menu.scrollLeft);
         }
@@ -87,7 +80,6 @@
             }
         });
     });
-
 </script>
 
 {{- if (not site.Params.disableScrollToTop) }}
@@ -101,72 +93,5 @@
             toplink.classList.add("hidden");
         }
     };
-
-</script>
-{{- end }}
-
-{{- if (not site.Params.disableThemeToggle) }}
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        const html = document.querySelector("html");
-        if (html.dataset.theme === "dark") {
-            html.dataset.theme = 'light';
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            html.dataset.theme = 'dark';
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
-{{- end }}
-
-{{- if (and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") (.Param "ShowCodeCopyButtons")) }}
-<script>
-    document.querySelectorAll('pre > code').forEach((codeblock) => {
-        const container = codeblock.parentNode.parentNode;
-
-        const copybutton = document.createElement('button');
-        copybutton.classList.add('copy-code');
-        copybutton.innerHTML = '{{- i18n "code_copy" | default "copy" }}';
-
-        function copyingDone() {
-            copybutton.innerHTML = '{{- i18n "code_copied" | default "copied!" }}';
-            setTimeout(() => {
-                copybutton.innerHTML = '{{- i18n "code_copy" | default "copy" }}';
-            }, 2000);
-        }
-
-        copybutton.addEventListener('click', (cb) => {
-            if ('clipboard' in navigator) {
-                navigator.clipboard.writeText(codeblock.textContent);
-                copyingDone();
-                return;
-            }
-
-            const range = document.createRange();
-            range.selectNodeContents(codeblock);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            try {
-                document.execCommand('copy');
-                copyingDone();
-            } catch (e) { };
-            selection.removeRange(range);
-        });
-
-        if (container.classList.contains("highlight")) {
-            container.appendChild(copybutton);
-        } else if (container.parentNode.firstChild == container) {
-            // td containing LineNos
-        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
-            // table containing LineNos and code
-            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
-        } else {
-            // code blocks not having highlight as parent class
-            codeblock.parentNode.appendChild(copybutton);
-        }
-    });
 </script>
 {{- end }}

@@ -1,20 +1,44 @@
 {{ define "404.html" }}
-{{- /* 404 兜底页：保持期刊语气 */ -}}
+{{- /* 404 兜底页：保持期刊语气
+     独立模板（不走 baseof），因此不继承页眉文字导航与页脚版权行，
+     这里手工补上刊名、标语与 ISSN，使 404 页与全站品牌一致。 */ -}}
 <!DOCTYPE html>
-<html lang="{{ site.Language.Locale | default "zh-CN" }}">
+<html lang="{{ site.Language.Locale | default "zh-CN" }}" dir="{{ .Language.Direction | default "ltr" }}">
 <head>
   {{ partial "head.html" . }}
   {{- $title := "404 · 蝗迹未存" }}
   <title>{{ $title }}</title>
 </head>
-<body>
+<body id="top">
+<header class="lj-header">
+  <nav class="lj-topnav" aria-label="主导航">
+    <a class="lj-topnav__brand" href="{{ "/" | relURL }}">内测号 · 第 1 卷</a>
+    <ul class="lj-topnav__list">
+      <li><a href="{{ "/" | relURL }}">首页</a></li>
+      <li><a href="{{ "/articles/" | relURL }}">蝗札</a></li>
+      <li><a href="{{ "/scholar/" | relURL }}">蝗客学社</a></li>
+      <li><a href="{{ "/archive/" | relURL }}">总归档</a></li>
+    </ul>
+  </nav>
+</header>
+
 <main class="main">
   <div class="content">
+    <header class="lj-masthead lj-masthead--inner">
+      <p class="lj-masthead__name">LOCUST JOURNAL <span class="lj-masthead__cn">学术蝗虫</span></p>
+      <p class="lj-masthead__motto">
+        <span lang="en">Locusts can read. They still only come for tea.</span>
+        <span>蝗虫识字，只赴茶歇</span>
+      </p>
+    </header>
+
     <h1>404 · 蝗迹未存</h1>
+
     <blockquote>
       <p>蝗虫识字，只赴茶歇。<br />
       但这一页，连茶歇都没有。</p>
     </blockquote>
+
     <p>你访问的页面不存在、已被撤稿，或作者在组会前一晚把它从硬盘上删了（我们深有体会）。</p>
     <p>以下或许有用：</p>
     <ul>
@@ -23,12 +47,26 @@
       <li><a href="{{ "/scholar/" | relURL }}">阅览蝗客学社</a></li>
       <li><a href="{{ "/archive/" | relURL }}">总归档</a></li>
     </ul>
-    <hr />
-    <p style="font-size:0.9em;opacity:0.75">
-      LOCUST Journal《学术蝗虫》· 娱乐模拟学术刊物，无学术效力
-    </p>
   </div>
 </main>
+
+<footer class="footer lj-footer">
+  <div class="lj-footer__notice">
+    本刊为<b>纯娱乐性质的模拟学术刊物</b>，不属于正式出版物，所刊载内容不具备任何学术效力，
+    不可用于毕业、评奖、职称认定与项目申报。本刊永久免费，不收取任何版面费、审稿费与处理费。
+  </div>
+  <div class="lj-footer__ident">
+    <span class="lj-footer__issn">ISSN 0000-0000（测试用）</span>
+    <span class="lj-footer__sep">·</span>
+    <span>刊号 LJ-2026-001</span>
+    <span class="lj-footer__sep">·</span>
+    <span>第 1 卷 · 内测号</span>
+  </div>
+  <div class="lj-footer__copy">
+    <span>&copy; 2026 LOCUST Journal《学术蝗虫》编辑部</span>
+  </div>
+</footer>
 </body>
+
 </html>
 {{ end }}

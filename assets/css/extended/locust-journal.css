@@ -53,12 +53,19 @@
   --lj-paper: #fff;           /* 纸白：纯白，无暖调 */
   --lj-rule: #d8d8d8;         /* 栏线：浅灰 */
   --lj-rule-strong: #000;     /* 主栏线 */
-  --lj-accent: #0b57a4;       /* 链接蓝：唯一常规强调色 */
+  /* 链接色：实测 PLOS ONE 的论文标题链接为 rgb(32,32,32)（近黑）且无下划线，
+     arXiv 的题名同样用黑色。学术期刊的内容链接从不发蓝 —— 蓝色链接是
+     博客 / 技术站最强的视觉信号，也是本站此前「杂牌感」的最大来源。
+     故常规链接改用近黑，仅在 hover 时以暖色示意可点。 */
+  --lj-link: #1a1a1a;
+  --lj-accent: #8a4b00;       /* 极少量点缀：标签、序号强调 */
   --lj-warn: #8a4b00;         /* 免责 / 声明专用暖色，极少量使用 */
 
   --theme-font-family: var(--lj-serif);
   --content-font-size: 17px;
-  --theme-color: var(--lj-accent);
+  /* PaperMod 的全局强调色。内容链接已改深色（--lj-link），
+     这里给墨色而非暖色，避免主题里任何残留的强调元素带赭石。 */
+  --theme-color: var(--lj-ink);
 }
 
 body {
@@ -170,16 +177,17 @@ h6 {
 }
 }
 
-/* 首页底部编务链接：横排文字链接，不用居中点分隔 */
+/* 首页底部编务链接：横排文字链接，不用居中点分隔。
+   间距给到 1.6em —— 1.2rem 在 17px 字号下相邻词组会视觉粘连。 */
 .lj-home__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem 1.2rem;
+  gap: 0.3rem 1.8rem;
   text-indent: 0;
 }
 
 .lj-home__links a {
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -233,6 +241,43 @@ h6 {
   margin-right: 0.35em;
 }
 
+/* 期刊身份标识行（首页）
+   ---------------------------------------------------------------------------
+   实测 PLOS ONE 首页首屏印有「ISSN: 1932-6203」。这类字段是「这是一本
+   正式出版物」最直接的视觉信号 —— 本站此前完全没有，是不像期刊的主因之一。
+   形态对齐期刊惯例：小字、灰、字段名与值同行、字段间用间隔点分隔。 */
+.lj-ident {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.55rem;
+  margin: 0 0 1.5rem;
+  padding: 0 0 0.6rem;
+  border-bottom: 1px solid var(--lj-rule);
+  font-family: var(--lj-serif);
+  font-size: 0.76rem;
+  color: var(--lj-ink-soft);
+}
+
+.lj-ident__issn {
+  letter-spacing: 0.05em;
+  color: var(--lj-ink);
+  font-weight: 500;
+}
+
+.lj-ident__item {
+  white-space: nowrap;
+}
+
+.lj-ident__label {
+  color: var(--lj-ink-faint);
+  margin-right: 0.3em;
+}
+
+.lj-ident__sep {
+  color: var(--lj-rule-strong);
+}
+
 /* ============================================================================
    二、栏线 Column Rules
    ========================================================================== */
@@ -253,17 +298,19 @@ h6 {
   margin: 1.4rem 0;
 }
 
-/* 分节标题：左对齐、纯黑、无装饰横线。
-   实测基准里 h2 是 19.44px/700/#000/左对齐，没有任何两侧横线。 */
+/* 分节标题：左对齐、衬线、纯黑、无装饰横线。
+   2026-10 实测校准：PLOS ONE 的分节标题为 15px/600 且无下边框，
+   本站此前是 16.8px/700 且带一条灰线 —— 字号偏大、字重偏重、
+   多一条线，三项叠加都偏离期刊。以下按实测值收敛。 */
 .lj-section-head {
-  font-family: var(--lj-sans);
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: var(--lj-serif);
+  font-size: 1.02rem;
+  font-weight: 600;
   color: var(--lj-ink);
   text-align: left;
-  margin: 1.9rem 0 0.6rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 1px solid var(--lj-rule);
+  margin: 2rem 0 0.7rem;
+  padding-bottom: 0;
+  border-bottom: 0;
   display: block;
 }
 
@@ -318,7 +365,7 @@ h6 {
 }
 
 .lj-toc__title a {
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -341,7 +388,7 @@ h6 {
   display: inline-block;
   margin-top: 0.3rem;
   font-size: 0.76rem;
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -562,16 +609,16 @@ h6 {
   color: var(--lj-ink);
 }
 
-/* 链接：蓝色下划线 */
+/* 正文内链：深色、无下划线，hover 才出 —— 对齐期刊正文排版 */
 .post-content a {
-  color: var(--lj-accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  color: var(--lj-link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--lj-rule);
 }
 
 .post-content a:hover {
   color: var(--lj-ink);
+  border-bottom-color: var(--lj-ink);
 }
 
 .post-content blockquote {
@@ -798,12 +845,95 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 /* ============================================================================
-   七、页眉 / 页脚
+   七、页眉文字导航行 / 页脚版权行
+   ---------------------------------------------------------------------------
+   改造依据（2026-10 实测）：
+   PaperMod 原生页眉是「白底 + 底部边框 + 左刊名右菜单」的横条，这是博客与
+   文档站的导航形态。实测 PLOS ONE（journals.plos.org）与 arXiv，页首导航
+   都是排在一行里的纯文字链接 —— 没有容器底色、没有边框、没有独立方块，
+   当前项只用字重或下边线区分。
+
+   故此把 .header 系列整体停用，改用下面的 .lj-header 系列。
    ========================================================================== */
 
+/* 原生横条停用（显式 none 以压过主题样式，不靠选择器权重赌） */
 .header {
-  border-bottom: 1px solid var(--lj-rule);
+  display: none;
+}
+
+.lj-header {
   background: var(--lj-paper);
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-topnav {
+  max-width: var(--main-width);
+  margin: 0 auto;
+  padding: 0 1.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1.6rem;
+  min-height: 42px;
+  line-height: 1.5;
+}
+
+/* 左端卷期标识：期刊页首的期次标注，代替主题的博客 logo */
+.lj-topnav__brand {
+  font-family: var(--lj-serif);
+  font-size: 0.86rem;
+  color: var(--lj-ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0.55rem 0 0.5rem;
+  border-bottom: 2px solid var(--lj-ink);
+  flex-shrink: 0;
+}
+
+.lj-topnav__brand:hover {
+  color: var(--lj-ink);
+}
+
+/* 栏目导航：纯文字行，间距靠 gap，不做色块 */
+.lj-topnav__list {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.lj-topnav__list::-webkit-scrollbar {
+  display: none;
+}
+
+.lj-topnav__list a {
+  font-family: var(--lj-serif);
+  font-size: 0.88rem;
+  color: var(--lj-ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0.55rem 0 0.5rem;
+  border-bottom: 2px solid transparent;
+}
+
+.lj-topnav__list a:hover {
+  color: var(--lj-ink);
+  border-bottom-color: var(--lj-rule-strong);
+}
+
+/* 当前栏目：加粗 + 深色下边线，不填色块 */
+.lj-topnav__list a .active {
+  color: var(--lj-ink);
+  font-weight: 700;
+  border-bottom: 2px solid var(--lj-ink);
+  padding-bottom: 0.5rem;
+}
+
+.lj-topnav__list a:hover .active {
+  border-bottom-color: var(--lj-ink);
 }
 
 /* 栏宽：PaperMod 默认 --main-width: 720px，对期刊正文偏窄。
@@ -814,87 +944,68 @@ article.post-content div.highlight pre.chroma > code {
   --main-width: 1080px;
 }
 
-.header-nav {
-  max-width: 1080px;
-  line-height: 46px;
-}
-
-/* 刊名/logo：细体，与正文刊头一致。700 是博客/落地页的做法。 */
-.logo a {
-  font-family: var(--lj-sans);
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--lj-ink);
-}
-
-/* 导航项：期刊目录页的导航是低调的小字，不做粗体强调 */
-.menu a {
-  font-size: 0.82rem;
-  color: var(--lj-ink-soft);
-}
-
-.menu a:hover {
-  color: var(--lj-ink);
-}
-
-.menu .active {
-  color: var(--lj-ink);
-  font-weight: 400;
-  text-decoration: none;
-  box-shadow: inset 0 -2px 0 var(--lj-ink);
-}
-
 .footer {
   border-top: 1px solid var(--lj-rule);
-  margin-top: 3rem;
-  font-family: var(--lj-sans);
+  margin-top: 3.5rem;
+  font-family: var(--lj-serif);
   color: var(--lj-ink-soft);
+  background: var(--lj-paper);
 }
 
-.footer-inner {
-  max-width: 1100px;
-  padding-top: 1.2rem;
-  padding-bottom: 1.4rem;
-}
-
-.footer .footer-copyright {
-  font-size: 0.76rem;
-}
-
-.footer .footer-message {
-  font-size: 0.75rem;
-  line-height: 1.7;
-  color: var(--lj-ink-faint);
-  max-width: 46em;
-  margin: 0.6rem auto 0;
+/* 页脚内容：期刊版权行三段式（免责 / 身份标识 / 版权） */
+.lj-footer {
+  max-width: var(--main-width);
+  margin: 0 auto;
+  padding: 1.5rem 1.4rem 2rem;
   text-align: center;
+  font-size: 0.76rem;
+  line-height: 1.85;
 }
 
-.footer .powered-by {
-  font-size: 0.68rem;
-  color: var(--lj-ink-faint);
-  opacity: 0.7;
-}
-
-/* ============================================================================
-   八、免责声明条
-   唯一保留暖色的地方：免责声明确实需要被看见，但降为单行细边注记。
-   ========================================================================== */
-
-.lj-disclaimer {
-  border: 1px solid var(--lj-rule);
-  border-left: 2px solid var(--lj-warn);
-  padding: 0.7rem 0.9rem;
-  margin: 0 0 1.4rem;
-  font-size: 0.8rem;
-  line-height: 1.7;
+/* 免责声明：原先是首页首屏的告警框，现降为页脚小字 */
+.lj-footer__notice {
+  max-width: 44em;
+  margin: 0 auto 0.9rem;
   color: var(--lj-ink-soft);
-  background: transparent;
+  text-align: justify;
 }
 
-.lj-disclaimer b {
+.lj-footer__notice b {
   color: var(--lj-ink);
   font-weight: 700;
+}
+
+.lj-footer__ident {
+  font-size: 0.73rem;
+  color: var(--lj-ink-faint);
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-footer__issn {
+  letter-spacing: 0.04em;
+}
+
+.lj-footer__copy {
+  font-size: 0.72rem;
+  color: var(--lj-ink-faint);
+}
+
+.lj-footer__copy a {
+  color: var(--lj-ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--lj-rule);
+}
+
+.lj-footer__copy a:hover {
+  color: var(--lj-ink);
+  border-bottom-color: var(--lj-ink);
+}
+
+.lj-footer__sep {
+  margin: 0 0.45em;
+  color: var(--lj-rule-strong);
 }
 
 /* ============================================================================
@@ -914,7 +1025,7 @@ article.post-content div.highlight pre.chroma > code {
 /* 标签：纯文字链接，不装框 */
 .tags a {
   font-size: 0.76rem;
-  color: var(--lj-accent);
+  color: var(--lj-link);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -1047,7 +1158,7 @@ article.post-content div.highlight pre.chroma > code {
   flex: 0 0 auto;
   min-width: 9em;
   font-size: 0.94rem;
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -1179,7 +1290,7 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 .lj-docnav__list a {
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -1280,7 +1391,7 @@ article.post-content div.highlight pre.chroma > code {
 }
 
 .lj-volume__meta a {
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -1325,7 +1436,7 @@ article.post-content div.highlight pre.chroma > code {
 .lj-submit__link {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--lj-accent);
+  color: var(--lj-link);
   text-decoration: none;
 }
 
@@ -1368,14 +1479,10 @@ article.post-content div.highlight pre.chroma > code {
         仍按宽屏排版。
    ========================================================================== */
 
-/* ---- 平板：栏宽收窄，导航恢复主题默认排布 ---- */
+/* ---- 平板：栏宽收窄 ---- */
 @media (max-width: 1080px) {
   :root {
     --main-width: 100%;
-  }
-
-  .header-nav {
-    max-width: 100%;
   }
 }
 
@@ -1533,43 +1640,20 @@ article.post-content div.highlight pre.chroma > code {
     padding-left: 0.85rem;
   }
 
-  /* 导航：横向滚动 + 边缘渐隐，替代换行挤成一团 */
-  .header-nav {
+  /* 导航：横向滚动，不换行挤成一团 */
+  .lj-topnav {
     padding: 0 12px;
-    column-gap: 12px;
-    line-height: 44px;
+    gap: 12px;
   }
 
-  .menu {
-    flex: 1 0 100%;
-    order: 3;
-    column-gap: 14px;
-    padding-bottom: 4px;
-    overflow-x: auto;
-    flex-wrap: nowrap;
+  .lj-topnav__list {
+    gap: 14px;
+    padding-bottom: 2px;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--lj-rule) transparent;
-    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
   }
 
-  .menu::-webkit-scrollbar {
-    height: 3px;
-  }
-
-  .menu::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .menu::-webkit-scrollbar-thumb {
-    background: var(--lj-rule);
-    border-radius: 3px;
-  }
-
-  .menu a {
-    font-size: 0.8rem;
-    white-space: nowrap;
+  .lj-topnav__list a {
+    font-size: 0.84rem;
   }
 
   .lj-imprint {
@@ -1667,6 +1751,7 @@ article.post-content div.highlight pre.chroma > code {
 
 @media print {
   .header,
+  .lj-header,
   .footer,
   .breadcrumb,
   .post-navigation,

@@ -13,17 +13,19 @@
   {{/* ---------- 刊头：左对齐单行，下方主线分隔 ---------- */}}
   {{ partial "lj-masthead.html" . }}
 
-  {{/* ---------- 刊头元信息行：卷期 / 刊号 / 编辑部 ---------- */}}
-  <div class="lj-imprint">
-    <span class="lj-imprint__item lj-imprint__item--accent">第 1 卷 · 内测号</span>
-    <span class="lj-imprint__item"><span class="lj-imprint__label">刊期</span>2026 年 9 月</span>
-    <span class="lj-imprint__item"><span class="lj-imprint__label">刊号</span>LJ-2026-001</span>
-    <span class="lj-imprint__item"><span class="lj-imprint__label">编辑</span>LOCUST Journal Editorial Board</span>
-  </div>
-
-  {{/* ---------- 免责声明 ---------- */}}
-  <div class="lj-disclaimer">
-    <b>重要提示</b>　本刊为<b>纯娱乐性质的模拟学术刊物</b>，不属于正式出版物，所刊载内容不具备任何学术效力，不可用于毕业、评奖、职称认定与项目申报。本刊永久免费，不收取任何版面费、审稿费与处理费。
+  {{/* ---------- 期刊身份标识 ----------
+     实测 PLOS ONE 首页首屏有 ISSN 标识，这是「这是一本刊物」最直接���视觉
+     信号。之前完全缺失，是不像期刊的主因之一。 */}}
+  <div class="lj-ident">
+    <span class="lj-ident__issn">ISSN 0000-0000（测试用）</span>
+    <span class="lj-ident__sep">·</span>
+    <span class="lj-ident__item"><span class="lj-ident__label">刊号</span>LJ-2026-001</span>
+    <span class="lj-ident__sep">·</span>
+    <span class="lj-ident__item"><span class="lj-ident__label">刊期</span>2026 年 9 月</span>
+    <span class="lj-ident__sep">·</span>
+    <span class="lj-ident__item"><span class="lj-ident__label">出版周期</span>不定期</span>
+    <span class="lj-ident__sep">·</span>
+    <span class="lj-ident__item"><span class="lj-ident__label">编辑</span>LOCUST Journal Editorial Board</span>
   </div>
 
   {{/* ---------- 本卷要目 ----------

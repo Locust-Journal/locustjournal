@@ -1,0 +1,38 @@
+{{- /* LOCUST Journal 页眉 —— 期刊文字导航行
+     覆盖 PaperMod 的 layouts/_partials/header.html。
+
+     为什么改：
+     主题原版是「白底 + 底部边框 + 左刊名右菜单」的横条，这是博客/文档站
+     的导航形态。实测 PLOS ONE、arXiv 等真实学术刊物，页首导航都是
+     排在一行里的纯文字链接，没有容器底色、没有边框、没有独立方块。
+
+     改造后：
+       · 去掉白底与边框，改为一行文字链接
+       · 当前栏目用加粗 + 下边线标示，不填色块
+       · 保留主题原有的 menu-scroll-position 脚本依赖（id 仍为 menu）
+       · 不显示主题切换按钮：本刊固定浅色，不做暗色模式
+
+     主题原版的 logo/主题切换/多语言分支一并移除 —— 本项目单语言、固定浅色，
+     留着只会增加「这是个模板站」的观感。 */ -}}
+<header class="lj-header">
+  <nav class="lj-topnav" aria-label="主导航">
+    <a class="lj-topnav__brand" href="{{ "" | absLangURL }}" accesskey="h" title="LOCUST Journal 首页 (Alt + H)">
+      内测号 · 第 1 卷
+    </a>
+    <ul id="menu" class="lj-topnav__list">
+      {{- $currentPage := . }}
+      {{- range site.Menus.main }}
+      {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL)) | absLangURL }}
+      {{- $page_url := $currentPage.Permalink | absLangURL }}
+      {{- $is_search := eq (site.GetPage .KeyName).Layout `search` }}
+      <li>
+        <a href="{{ .URL | absLangURL }}"
+           title="{{ .Title | default .Name }}{{ cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr) }}"
+           {{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr) }}>
+          <span {{- if eq $menu_item_url $page_url }} class="active"{{ end }}>{{ .Pre }}{{ .Name }}{{ .Post }}</span>
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+  </nav>
+</header>
